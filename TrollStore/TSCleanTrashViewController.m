@@ -1,6 +1,7 @@
 #import "TSCleanTrashViewController.h"
 #import "TSFileCleanerManager.h"
 #import <TSPresentationDelegate.h>
+#import <TSUtil.h>
 
 @interface TSCleanTrashViewController ()
 {
@@ -33,9 +34,11 @@
 	[super viewDidLoad];
 
 	self.tableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectZero];
+	self.tableView.allowsMultipleSelectionDuringEditing = YES;
 
 	UIBarButtonItem* scanButton = [[UIBarButtonItem alloc] initWithImage:[UIImage systemImageNamed:@"magnifyingglass"] style:UIBarButtonItemStylePlain target:self action:@selector(scanJunkPressed)];
-	self.navigationItem.rightBarButtonItem = scanButton;
+	UIBarButtonItem* moreButton = [[UIBarButtonItem alloc] initWithImage:[UIImage systemImageNamed:@"ellipsis.circle"] style:UIBarButtonItemStylePlain target:self action:@selector(morePressed)];
+	self.navigationItem.rightBarButtonItems = @[moreButton, scanButton];
 
 	[self reloadEntries];
 }
@@ -104,6 +107,8 @@
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath
 {
+	if(self.isEditing) return;
+
 	[tableView deselectRowAtIndexPath:indexPath animated:YES];
 
 	NSDictionary* entry = _entries[indexPath.row];
@@ -152,6 +157,154 @@
 	[confirmAlert addAction:cancelAction];
 
 	[TSPresentationDelegate presentViewController:confirmAlert animated:YES completion:nil];
+}
+
+#pragma mark - More menu / multi-select delete
+
+- (void)morePressed
+{
+	UIAlertController* menu = [UIAlertController alertControllerWithTitle:nil message:nil preferredStyle:UIAlertControllerStyleActionSheet];
+
+	UIAlertAction* selectAction = [UIAlertAction actionWithTitle:@"Chọn tệp để xoá" style:UIAlertActionStyleDefault handler:^(UIAlertAction* action)
+	{
+		[self setEditing:YES animated:YES];
+	}];
+	[menu addAction:selectAction];
+
+	UIAlertAction* deleteAllAction = [UIAlertAction actionWithTitle:@"Xoá tất cả trong thư mục này" style:UIAlertActionStyleDestructive handler:^(UIAlertAction* action)
+	{
+		[self confirmDeleteAllInCurrentFolder];
+	}];
+	[menu addAction:deleteAllAction];
+
+	UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:@"Huỷ" style:UIAlertActionStyleCancel handler:nil];
+	[menu addAction:cancelAction];
+
+	menu.popoverPresentationController.barButtonItem = self.navigationItem.rightBarButtonItems.firstObject;
+
+	[TSPresentationDelegate presentViewController:menu animated:YES completion:nil];
+}
+
+- (void)setEditing:(BOOL)editing animated:(BOOL)animated
+{
+	[super setEditing:editing animated:animated];
+	[self.tableView setEditing:editing animated:animated];
+
+	if(editing)
+	{
+		UIBarButtonItem* deleteSelectedButton = [[UIBarButtonItem alloc] initWithTitle:@"Xoá mục đã chọn" style:UIBarButtonItemStylePlain target:self action:@selector(deleteSelectedPressed)];
+		deleteSelectedButton.tintColor = UIColor.systemRedColor;
+		self.toolbarItems = @[
+			[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil],
+			deleteSelectedButton,
+			[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil]
+		];
+		self.navigationController.toolbarHidden = NO;
+		self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(cancelEditingPressed)];
+	}
+	else
+	{
+		self.navigationController.toolbarHidden = YES;
+		self.navigationItem.leftBarButtonItem = nil;
+	}
+}
+
+- (void)cancelEditingPressed
+{
+	[self setEditing:NO animated:YES];
+}
+
+- (void)deleteSelectedPressed
+{
+	NSArray<NSIndexPath*>* selectedIndexPaths = self.tableView.indexPathsForSelectedRows;
+	if(selectedIndexPaths.count == 0) return;
+
+	NSMutableArray* pathsToDelete = [NSMutableArray new];
+	for(NSIndexPath* indexPath in selectedIndexPaths)
+	{
+		[pathsToDelete addObject:_entries[indexPath.row][@"path"]];
+	}
+
+	UIAlertController* confirmAlert = [UIAlertController alertControllerWithTitle:@"Xác nhận xoá" message:[NSString stringWithFormat:@"Xoá %lu mục đã chọn? Hành động này không thể hoàn tác.", (unsigned long)pathsToDelete.count] preferredStyle:UIAlertControllerStyleAlert];
+
+	UIAlertAction* deleteAction = [UIAlertAction actionWithTitle:@"Xoá" style:UIAlertActionStyleDestructive handler:^(UIAlertAction* action)
+	{
+		[self performBulkDeleteOfPaths:pathsToDelete];
+	}];
+	[confirmAlert addAction:deleteAction];
+
+	UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:@"Huỷ" style:UIAlertActionStyleCancel handler:nil];
+	[confirmAlert addAction:cancelAction];
+
+	[TSPresentationDelegate presentViewController:confirmAlert animated:YES completion:nil];
+}
+
+- (void)confirmDeleteAllInCurrentFolder
+{
+	UIAlertController* confirmAlert = [UIAlertController alertControllerWithTitle:@"Xác nhận xoá tất cả" message:[NSString stringWithFormat:@"Xoá toàn bộ %lu mục trong \"%@\"? Hành động này không thể hoàn tác.", (unsigned long)_entries.count, _path.lastPathComponent] preferredStyle:UIAlertControllerStyleAlert];
+
+	UIAlertAction* deleteAction = [UIAlertAction actionWithTitle:@"Xoá tất cả" style:UIAlertActionStyleDestructive handler:^(UIAlertAction* action)
+	{
+		[self performBulkDeleteEmptyingCurrentFolder];
+	}];
+	[confirmAlert addAction:deleteAction];
+
+	UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:@"Huỷ" style:UIAlertActionStyleCancel handler:nil];
+	[confirmAlert addAction:cancelAction];
+
+	[TSPresentationDelegate presentViewController:confirmAlert animated:YES completion:nil];
+}
+
+- (void)performBulkDeleteOfPaths:(NSArray<NSString*>*)paths
+{
+	[TSPresentationDelegate startActivity:@"Đang xoá"];
+	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^
+	{
+		for(NSString* path in paths)
+		{
+			[[TSFileCleanerManager sharedInstance] deleteItemAtPath:path];
+		}
+		dispatch_async(dispatch_get_main_queue(), ^
+		{
+			[TSPresentationDelegate stopActivityWithCompletion:^
+			{
+				[self setEditing:NO animated:YES];
+				[self reloadEntries];
+				[self showDeleteSuccessThenRespring];
+			}];
+		});
+	});
+}
+
+- (void)performBulkDeleteEmptyingCurrentFolder
+{
+	NSString* path = _path;
+	[TSPresentationDelegate startActivity:@"Đang xoá"];
+	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^
+	{
+		[[TSFileCleanerManager sharedInstance] emptyDirectoryAtPath:path];
+		dispatch_async(dispatch_get_main_queue(), ^
+		{
+			[TSPresentationDelegate stopActivityWithCompletion:^
+			{
+				[self reloadEntries];
+				[self showDeleteSuccessThenRespring];
+			}];
+		});
+	});
+}
+
+- (void)showDeleteSuccessThenRespring
+{
+	UIAlertController* successAlert = [UIAlertController alertControllerWithTitle:@"Đã xoá xong" message:@"Đang respring máy để dọn sạch..." preferredStyle:UIAlertControllerStyleAlert];
+
+	[TSPresentationDelegate presentViewController:successAlert animated:YES completion:^
+	{
+		dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^
+		{
+			respring();
+		});
+	}];
 }
 
 #pragma mark - Junk scan
@@ -225,6 +378,7 @@
 			[TSPresentationDelegate stopActivityWithCompletion:^
 			{
 				[self reloadEntries];
+				[self showDeleteSuccessThenRespring];
 			}];
 		});
 	});

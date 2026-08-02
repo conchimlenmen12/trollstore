@@ -21,14 +21,9 @@
 	UINavigationController* cleanTrashNavigationController = [[UINavigationController alloc] initWithRootViewController:cleanTrashVC];
 	UINavigationController* settingsNavigationController = [[UINavigationController alloc] initWithRootViewController:settingsListVC];
 
-	appNavigationController.navigationBar.prefersLargeTitles = YES;
-	appTableVC.navigationItem.largeTitleDisplayMode = UINavigationItemLargeTitleDisplayModeAlways;
-
-	cleanTrashNavigationController.navigationBar.prefersLargeTitles = YES;
-	cleanTrashVC.navigationItem.largeTitleDisplayMode = UINavigationItemLargeTitleDisplayModeAlways;
-
-	settingsNavigationController.navigationBar.prefersLargeTitles = YES;
-	settingsListVC.navigationItem.largeTitleDisplayMode = UINavigationItemLargeTitleDisplayModeAlways;
+	appTableVC.navigationItem.largeTitleDisplayMode = UINavigationItemLargeTitleDisplayModeNever;
+	cleanTrashVC.navigationItem.largeTitleDisplayMode = UINavigationItemLargeTitleDisplayModeNever;
+	settingsListVC.navigationItem.largeTitleDisplayMode = UINavigationItemLargeTitleDisplayModeNever;
 
 	// broom(.fill) was only added in SF Symbols 4 / iOS 16, fall back to the trash icon on older versions
 	UIImage* cleanTrashIcon = [UIImage systemImageNamed:@"broom.fill"] ?: [UIImage systemImageNamed:@"trash.circle.fill"];

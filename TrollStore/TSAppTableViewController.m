@@ -194,7 +194,7 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 {
 	TSApplicationsManager* appsManager = [TSApplicationsManager sharedInstance];
 
-	TSAppInfo* appInfo = _cachedAppInfos[indexPath.row];
+	TSAppInfo* appInfo = _cachedAppInfos[indexPath.section];
 	NSString* appId = [appInfo bundleIdentifier];
 	BOOL didOpen = [appsManager openApplicationWithBundleID:appId];
 
@@ -229,7 +229,7 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 
 - (void)showDetailsPressedForRowAtIndexPath:(NSIndexPath*)indexPath
 {
-	TSAppInfo* appInfo = _cachedAppInfos[indexPath.row];
+	TSAppInfo* appInfo = _cachedAppInfos[indexPath.section];
 
 	[appInfo loadInfoWithCompletion:^(NSError* error)
 	{
@@ -260,7 +260,7 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 
 - (void)changeAppRegistrationForRowAtIndexPath:(NSIndexPath*)indexPath toState:(NSString*)newState
 {
-	TSAppInfo* appInfo = _cachedAppInfos[indexPath.row];
+	TSAppInfo* appInfo = _cachedAppInfos[indexPath.section];
 
 	if([newState isEqualToString:@"User"])
 	{
@@ -309,7 +309,7 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 {
 	TSApplicationsManager* appsManager = [TSApplicationsManager sharedInstance];
 
-	TSAppInfo* appInfo = _cachedAppInfos[indexPath.row];
+	TSAppInfo* appInfo = _cachedAppInfos[indexPath.section];
 
 	NSString* appPath = [appInfo bundlePath];
 	NSString* appId = [appInfo bundleIdentifier];
@@ -345,12 +345,12 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-	return 1;
+	return _cachedAppInfos.count;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-	return _cachedAppInfos.count;
+	return 1;
 }
 
 - (void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection
@@ -365,9 +365,9 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 		cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"ApplicationCell"];
 	}
 
-	if(!indexPath || indexPath.row > (_cachedAppInfos.count - 1)) return cell;
+	if(!indexPath || indexPath.section > (_cachedAppInfos.count - 1)) return cell;
 
-	TSAppInfo* appInfo = _cachedAppInfos[indexPath.row];
+	TSAppInfo* appInfo = _cachedAppInfos[indexPath.section];
 	NSString* appId = [appInfo bundleIdentifier];
 	NSString* appVersion = [appInfo versionString];
 
@@ -395,7 +395,7 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 				UIImage* iconImage = imageWithSize([UIImage _applicationIconImageForBundleIdentifier:appId format:iconFormatToUse() scale:[UIScreen mainScreen].scale], _placeholderIcon.size);
 				_cachedIcons[appId] = iconImage;
 				dispatch_async(dispatch_get_main_queue(), ^{
-					NSIndexPath *curIndexPath = [NSIndexPath indexPathForRow:[_cachedAppInfos indexOfObject:appInfo] inSection:0];
+					NSIndexPath *curIndexPath = [NSIndexPath indexPathForRow:0 inSection:[_cachedAppInfos indexOfObject:appInfo]];
 					UITableViewCell *curCell = [tableView cellForRowAtIndexPath:curIndexPath];
 					if(curCell)
 					{
@@ -455,7 +455,7 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-	TSAppInfo* appInfo = _cachedAppInfos[indexPath.row];
+	TSAppInfo* appInfo = _cachedAppInfos[indexPath.section];
 
 	NSString* appId = [appInfo bundleIdentifier];
 	NSString* appName = [appInfo displayName];

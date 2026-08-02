@@ -23,13 +23,23 @@
 	titleLabel.translatesAutoresizingMaskIntoConstraints = NO;
 
 	UILabel* subtitleLabel = [[UILabel alloc] init];
-	subtitleLabel.text = @"Make By ©CheatiOSVip.VN";
+	subtitleLabel.text = @"Tham Gia Cộng Đồng:";
 	subtitleLabel.font = [UIFont systemFontOfSize:15];
 	subtitleLabel.textColor = UIColor.secondaryLabelColor;
-	subtitleLabel.textAlignment = NSTextAlignmentCenter;
 	subtitleLabel.translatesAutoresizingMaskIntoConstraints = NO;
 
-	UIStackView* stack = [[UIStackView alloc] initWithArrangedSubviews:@[iconView, titleLabel, subtitleLabel]];
+	UIButton* linkButton = [UIButton buttonWithType:UIButtonTypeSystem];
+	[linkButton setTitle:@"Tại đây" forState:UIControlStateNormal];
+	linkButton.titleLabel.font = [UIFont boldSystemFontOfSize:15];
+	[linkButton addTarget:self action:@selector(communityLinkPressed) forControlEvents:UIControlEventTouchUpInside];
+	linkButton.translatesAutoresizingMaskIntoConstraints = NO;
+
+	UIStackView* communityRow = [[UIStackView alloc] initWithArrangedSubviews:@[subtitleLabel, linkButton]];
+	communityRow.axis = UILayoutConstraintAxisHorizontal;
+	communityRow.alignment = UIStackViewAlignmentCenter;
+	communityRow.spacing = 4;
+
+	UIStackView* stack = [[UIStackView alloc] initWithArrangedSubviews:@[iconView, titleLabel, communityRow]];
 	stack.axis = UILayoutConstraintAxisVertical;
 	stack.alignment = UIStackViewAlignmentCenter;
 	stack.spacing = 16;
@@ -67,6 +77,15 @@
 - (void)closePressed
 {
 	[self dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (void)communityLinkPressed
+{
+	NSURL* url = [NSURL URLWithString:@"https://t.me/crackcyipa"];
+	if(url)
+	{
+		[[UIApplication sharedApplication] openURL:url options:@{} completionHandler:nil];
+	}
 }
 
 @end

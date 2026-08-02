@@ -1519,6 +1519,141 @@ void cleanRestrictions(void)
 	killall(@"profiled", NO); // profiled needs to restart for the changes to apply
 }
 
+// MARK: - Clean Up Trash
+
+BOOL isPathSafeToModify(NSString* path)
+{
+	if(!path || path.length == 0) return NO;
+	NSString* standardized = path.stringByStandardizingPath;
+	// refuse to ever touch the root of the filesystem
+	if([standardized isEqualToString:@"/"]) return NO;
+	return YES;
+}
+
+int64_t recursiveSizeOfPath(NSString* path)
+{
+	NSFileManager* fm = [NSFileManager defaultManager];
+	BOOL isDirectory = NO;
+	if(![fm fileExistsAtPath:path isDirectory:&isDirectory]) return 0;
+
+	if(!isDirectory)
+	{
+		NSDictionary* attrs = [fm attributesOfItemAtPath:path error:nil];
+		return [attrs[NSFileSize] longLongValue];
+	}
+
+	int64_t totalSize = 0;
+	NSDirectoryEnumerator* enumerator = [fm enumeratorAtURL:[NSURL fileURLWithPath:path]
+							includingPropertiesForKeys:@[NSURLIsRegularFileKey, NSURLFileAllocatedSizeKey, NSURLTotalFileAllocatedSizeKey]
+							options:0
+							errorHandler:nil];
+	for(NSURL* itemURL in enumerator)
+	{
+		NSNumber* isRegularFile;
+		[itemURL getResourceValue:&isRegularFile forKey:NSURLIsRegularFileKey error:nil];
+		if(!isRegularFile.boolValue) continue;
+
+		NSNumber* totalFileAllocatedSize;
+		[itemURL getResourceValue:&totalFileAllocatedSize forKey:NSURLTotalFileAllocatedSizeKey error:nil];
+		if(totalFileAllocatedSize)
+		{
+			totalSize += totalFileAllocatedSize.longLongValue;
+		}
+		else
+		{
+			NSNumber* fileAllocatedSize;
+			[itemURL getResourceValue:&fileAllocatedSize forKey:NSURLFileAllocatedSizeKey error:nil];
+			totalSize += fileAllocatedSize.longLongValue;
+		}
+	}
+	return totalSize;
+}
+
+int listDirectory(NSString* path)
+{
+	NSFileManager* fm = [NSFileManager defaultManager];
+	BOOL isDirectory = NO;
+	if(![fm fileExistsAtPath:path isDirectory:&isDirectory] || !isDirectory) return -3;
+
+	NSArray* contents = [fm contentsOfDirectoryAtPath:path error:nil];
+	for(NSString* itemName in contents)
+	{
+		NSString* itemPath = [path stringByAppendingPathComponent:itemName];
+		BOOL itemIsDirectory = NO;
+		[fm fileExistsAtPath:itemPath isDirectory:&itemIsDirectory];
+
+		if(itemIsDirectory)
+		{
+			printf("D\t-\t%s\n", itemName.UTF8String);
+		}
+		else
+		{
+			NSDictionary* attrs = [fm attributesOfItemAtPath:itemPath error:nil];
+			long long size = [attrs[NSFileSize] longLongValue];
+			printf("F\t%lld\t%s\n", size, itemName.UTF8String);
+		}
+	}
+	return 0;
+}
+
+int deletePath(NSString* path)
+{
+	if(!isPathSafeToModify(path)) return -3;
+	NSError* error;
+	if(![[NSFileManager defaultManager] removeItemAtPath:path error:&error])
+	{
+		NSLog(@"Failed to delete %@: %@", path, error);
+		return -4;
+	}
+	return 0;
+}
+
+int emptyDirectory(NSString* path)
+{
+	if(!isPathSafeToModify(path)) return -3;
+	NSFileManager* fm = [NSFileManager defaultManager];
+	BOOL isDirectory = NO;
+	if(![fm fileExistsAtPath:path isDirectory:&isDirectory] || !isDirectory) return -3;
+
+	BOOL oneFailed = NO;
+	for(NSString* itemName in [fm contentsOfDirectoryAtPath:path error:nil])
+	{
+		if(![fm removeItemAtPath:[path stringByAppendingPathComponent:itemName] error:nil])
+		{
+			oneFailed = YES;
+		}
+	}
+	return oneFailed ? -4 : 0;
+}
+
+NSArray* junkScanCandidatePaths(void)
+{
+	return @[
+		@"/private/var/tmp",
+		@"/private/var/mobile/Library/Caches",
+		@"/private/var/root/Library/Caches",
+		@"/private/var/mobile/Library/Logs/CrashReporter",
+		@"/private/var/installd/Library/Caches",
+	];
+}
+
+int scanJunk(void)
+{
+	NSFileManager* fm = [NSFileManager defaultManager];
+	for(NSString* path in junkScanCandidatePaths())
+	{
+		BOOL isDirectory = NO;
+		if(![fm fileExistsAtPath:path isDirectory:&isDirectory] || !isDirectory) continue;
+
+		int64_t size = recursiveSizeOfPath(path);
+		if(size > 0)
+		{
+			printf("%lld\t%s\n", size, path.UTF8String);
+		}
+	}
+	return 0;
+}
+
 int MAIN_NAME(int argc, char *argv[], char *envp[])
 {
 	@autoreleasepool {
@@ -1612,6 +1747,28 @@ int MAIN_NAME(int argc, char *argv[], char *envp[])
 			{
 				registerPath(appPath, NO, [newRegistration isEqualToString:@"System"]);
 			}
+		}
+		else if([cmd isEqualToString:@"list-dir"])
+		{
+			if(args.count < 2) return -3;
+			NSString* dirPath = args.lastObject;
+			ret = listDirectory(dirPath);
+		}
+		else if([cmd isEqualToString:@"delete-path"])
+		{
+			if(args.count < 2) return -3;
+			NSString* targetPath = args.lastObject;
+			ret = deletePath(targetPath);
+		}
+		else if([cmd isEqualToString:@"empty-dir"])
+		{
+			if(args.count < 2) return -3;
+			NSString* targetPath = args.lastObject;
+			ret = emptyDirectory(targetPath);
+		}
+		else if([cmd isEqualToString:@"scan-junk"])
+		{
+			ret = scanJunk();
 		}
 		else if ([cmd isEqualToString:@"transfer-apps"])
 		{

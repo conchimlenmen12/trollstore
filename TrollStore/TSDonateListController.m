@@ -22,7 +22,6 @@
 		
 		PSSpecifier* alfieGroupSpecifier = [PSSpecifier emptyGroupSpecifier];
 		alfieGroupSpecifier.name = @"Alfie";
-		[alfieGroupSpecifier setProperty:@"Alfie found the new CoreTrust bug (CVE-2023-41991) via patchdiffing, produced a POC binary and worked on automatically applying it with the help of the ChOma library, while also contributing to said library." forKey:@"footerText"];
 		[_specifiers addObject:alfieGroupSpecifier];
 
 		PSSpecifier* alfieDonateSpecifier = [PSSpecifier preferenceSpecifierNamed:@"Donate to alfiecg_dev"
@@ -39,7 +38,6 @@
 
 		PSSpecifier* opaGroupSpecifier = [PSSpecifier emptyGroupSpecifier];
 		opaGroupSpecifier.name = @"Opa";
-		[opaGroupSpecifier setProperty:@"Opa developed the ChOma library, helped with automating the bug using it and integrated it into TrollStore." forKey:@"footerText"];
 		[_specifiers addObject:opaGroupSpecifier];
 
 		PSSpecifier* opaDonateSpecifier = [PSSpecifier preferenceSpecifierNamed:@"Donate to opa334"

@@ -99,7 +99,6 @@ extern NSUserDefaults* trollStoreUserDefaults(void);
 		{
 			PSSpecifier* enableDevModeGroupSpecifier = [PSSpecifier emptyGroupSpecifier];
 			enableDevModeGroupSpecifier.name = @"Developer Mode";
-			[enableDevModeGroupSpecifier setProperty:@"Some apps require developer mode enabled to launch. This requires a reboot to take effect." forKey:@"footerText"];
 			[_specifiers addObject:enableDevModeGroupSpecifier];
 
 			PSSpecifier* enableDevModeSpecifier = [PSSpecifier preferenceSpecifierNamed:@"Enable Developer Mode"
@@ -118,19 +117,6 @@ extern NSUserDefaults* trollStoreUserDefaults(void);
 
 		PSSpecifier* utilitiesGroupSpecifier = [PSSpecifier emptyGroupSpecifier];
 		utilitiesGroupSpecifier.name = @"Utilities";
-
-		NSString *utilitiesDescription = @"";
-#ifdef TROLLSTORE_LITE
-		if (shouldRegisterAsUserByDefault()) {
-			utilitiesDescription = @"Apps will be registered as User by default since AppSync Unified is installed.\n\n";
-		}
-		else {
-			utilitiesDescription = @"Apps will be registered as System by default since AppSync Unified is not installed. When apps loose their System registration and stop working, press \"Refresh App Registrations\" here to fix them.\n\n";
-		}
-#endif
-		utilitiesDescription = [utilitiesDescription stringByAppendingString:@"If an app does not immediately appear after installation, respring here and it should appear afterwards."];
-
-		[utilitiesGroupSpecifier setProperty:utilitiesDescription forKey:@"footerText"];
 		[_specifiers addObject:utilitiesGroupSpecifier];
 
 		PSSpecifier* respringButtonSpecifier = [PSSpecifier preferenceSpecifierNamed:@"Respring"
@@ -203,16 +189,6 @@ extern NSUserDefaults* trollStoreUserDefaults(void);
 
 			PSSpecifier* signingGroupSpecifier = [PSSpecifier emptyGroupSpecifier];
 			signingGroupSpecifier.name = @"Signing";
-
-			if(ldidInstalled)
-			{
-				[signingGroupSpecifier setProperty:@"ldid is installed and allows TrollStore to install unsigned IPA files." forKey:@"footerText"];
-			}
-			else
-			{
-				[signingGroupSpecifier setProperty:@"In order for TrollStore to be able to install unsigned IPAs, ldid has to be installed using this button. It can't be directly included in TrollStore because of licensing issues." forKey:@"footerText"];
-			}
-
 			[_specifiers addObject:signingGroupSpecifier];
 
 			if(ldidInstalled)
@@ -272,7 +248,6 @@ extern NSUserDefaults* trollStoreUserDefaults(void);
 
 		if([[NSFileManager defaultManager] fileExistsAtPath:@"/Applications/TrollStorePersistenceHelper.app"])
 		{
-			[persistenceGroupSpecifier setProperty:@"When iOS rebuilds the icon cache, all TrollStore apps including TrollStore itself will be reverted to \"User\" state and either disappear or no longer launch. If that happens, you can use the TrollHelper app on the home screen to refresh the app registrations, which will make them work again." forKey:@"footerText"];
 			PSSpecifier* installedPersistenceHelperSpecifier = [PSSpecifier preferenceSpecifierNamed:@"Helper Installed as Standalone App"
 											target:self
 											set:nil
@@ -291,7 +266,6 @@ extern NSUserDefaults* trollStoreUserDefaults(void);
 			{
 				NSString* appName = [persistenceApp localizedName];
 
-				[persistenceGroupSpecifier setProperty:[NSString stringWithFormat:@"When iOS rebuilds the icon cache, all TrollStore apps including TrollStore itself will be reverted to \"User\" state and either disappear or no longer launch. If that happens, you can use the persistence helper installed into %@ to refresh the app registrations, which will make them work again.", appName] forKey:@"footerText"];
 				PSSpecifier* installedPersistenceHelperSpecifier = [PSSpecifier preferenceSpecifierNamed:[NSString stringWithFormat:@"Helper Installed into %@", appName]
 												target:self
 												set:nil
@@ -319,8 +293,6 @@ extern NSUserDefaults* trollStoreUserDefaults(void);
 			}
 			else
 			{
-				[persistenceGroupSpecifier setProperty:@"When iOS rebuilds the icon cache, all TrollStore apps including TrollStore itself will be reverted to \"User\" state and either disappear or no longer launch. The only way to have persistence in a rootless environment is to replace a system application, here you can select a system app to replace with a persistence helper that can be used to refresh the registrations of all TrollStore related apps in case they disappear or no longer launch." forKey:@"footerText"];
-
 				_installPersistenceHelperSpecifier = [PSSpecifier preferenceSpecifierNamed:@"Install Persistence Helper"
 												target:self
 												set:nil
@@ -338,8 +310,6 @@ extern NSUserDefaults* trollStoreUserDefaults(void);
 
 		PSSpecifier* installationSettingsGroupSpecifier = [PSSpecifier emptyGroupSpecifier];
 		installationSettingsGroupSpecifier.name = @"Security";
-		[installationSettingsGroupSpecifier setProperty:@"The URL Scheme, when enabled, will allow apps and websites to trigger TrollStore installations through the apple-magnifier://install?url=<IPA_URL> URL scheme and enable JIT through the apple-magnifier://enable-jit?bundle-id=<BUNDLE_ID> URL scheme." forKey:@"footerText"];
-
 		[_specifiers addObject:installationSettingsGroupSpecifier];
 
 		PSSpecifier* URLSchemeToggle = [PSSpecifier preferenceSpecifierNamed:@"URL Scheme Enabled"
@@ -370,7 +340,6 @@ extern NSUserDefaults* trollStoreUserDefaults(void);
 		[_specifiers addObject:installAlertConfigurationSpecifier];
 
 		PSSpecifier* otherGroupSpecifier = [PSSpecifier emptyGroupSpecifier];
-		[otherGroupSpecifier setProperty:[NSString stringWithFormat:@"%@ %@\n\n© 2022-2026 Lars Fröder (opa334)\n\nTrollStore is NOT for piracy!\n\nCredits:\nGoogle TAG, @alfiecg_dev: CoreTrust bug\n@lunotech11, @SerenaKit, @tylinux, @TheRealClarity, @dhinakg, @khanhduytran0: Various contributions\n@ProcursusTeam: uicache, ldid\n@cstar_ow: uicache\n@saurik: ldid", APP_NAME, [self getTrollStoreVersion]] forKey:@"footerText"];
 		[_specifiers addObject:otherGroupSpecifier];
 
 		PSSpecifier* advancedLinkSpecifier = [PSSpecifier preferenceSpecifierNamed:@"Advanced"

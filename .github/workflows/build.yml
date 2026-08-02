@@ -1,0 +1,56 @@
+name: Build TrollStore
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Theos
+        run: |
+          echo "THEOS=$HOME/theos" >> "$GITHUB_ENV"
+          export THEOS="$HOME/theos"
+          git clone --recursive https://github.com/theos/theos.git "$THEOS"
+
+      - name: Fetch iPhoneOS16.5 SDK
+        run: |
+          mkdir -p "$THEOS/sdks"
+          git clone -n --depth=1 --filter=tree:0 https://github.com/theos/sdks "$THEOS/sdks-tmp"
+          cd "$THEOS/sdks-tmp"
+          git sparse-checkout set --no-cone iPhoneOS16.5.sdk
+          git checkout
+          mv iPhoneOS16.5.sdk "$THEOS/sdks/"
+          cd ..
+          rm -rf "$THEOS/sdks-tmp"
+
+      - name: Install build dependencies
+        run: |
+          brew install ldid libarchive make
+          echo "/opt/homebrew/opt/make/libexec/gnubin" >> "$GITHUB_PATH"
+
+      - name: Build and install pwnify
+        run: |
+          make -C Pwnify install
+
+      - name: Build TrollStore
+        run: |
+          export THEOS="$HOME/theos"
+          make
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: TrollStore-build
+          path: |
+            _build/TrollStore.tar
+            _build/TrollHelper_iOS15.ipa
+            _build/TrollHelper_arm64e.ipa
+            TrollStoreLite/packages/*.deb

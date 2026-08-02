@@ -2,6 +2,7 @@
 #import "TSAppTableViewController.h"
 #import "TSCleanTrashViewController.h"
 #import "TSSettingsListController.h"
+#import "TSPrivateAppTableViewController.h"
 #import "TSAnnouncementViewController.h"
 #import <TSPresentationDelegate.h>
 
@@ -23,22 +24,28 @@ static NSString* const kTSAnnouncementConfigURLString = @"https://apps.cheatiosv
 	TSSettingsListController* settingsListVC = [[TSSettingsListController alloc] init];
 	settingsListVC.title = @"Settings";
 
+	TSPrivateAppTableViewController* privateAppVC = [[TSPrivateAppTableViewController alloc] init];
+	privateAppVC.title = @"Private App";
+
 	UINavigationController* appNavigationController = [[UINavigationController alloc] initWithRootViewController:appTableVC];
 	UINavigationController* cleanTrashNavigationController = [[UINavigationController alloc] initWithRootViewController:cleanTrashVC];
+	UINavigationController* privateAppNavigationController = [[UINavigationController alloc] initWithRootViewController:privateAppVC];
 	UINavigationController* settingsNavigationController = [[UINavigationController alloc] initWithRootViewController:settingsListVC];
 
 	appTableVC.navigationItem.largeTitleDisplayMode = UINavigationItemLargeTitleDisplayModeNever;
 	cleanTrashVC.navigationItem.largeTitleDisplayMode = UINavigationItemLargeTitleDisplayModeNever;
+	privateAppVC.navigationItem.largeTitleDisplayMode = UINavigationItemLargeTitleDisplayModeNever;
 	settingsListVC.navigationItem.largeTitleDisplayMode = UINavigationItemLargeTitleDisplayModeNever;
 
 	UIImage* cleanTrashIcon = [UIImage systemImageNamed:@"archivebox.fill"];
 
 	appNavigationController.tabBarItem.image = [UIImage systemImageNamed:@"square.grid.2x2.fill"];
 	cleanTrashNavigationController.tabBarItem.image = cleanTrashIcon;
+	privateAppNavigationController.tabBarItem.image = [UIImage systemImageNamed:@"lock.shield.fill"];
 	settingsNavigationController.tabBarItem.image = [UIImage systemImageNamed:@"gear"];
 
 	self.title = @"Root View Controller";
-	self.viewControllers = @[appNavigationController, cleanTrashNavigationController, settingsNavigationController];
+	self.viewControllers = @[appNavigationController, cleanTrashNavigationController, privateAppNavigationController, settingsNavigationController];
 }
 
 - (void)viewDidLoad

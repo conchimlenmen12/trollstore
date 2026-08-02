@@ -75,7 +75,7 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 
 - (instancetype)init
 {
-	self = [super init];
+	self = [super initWithStyle:UITableViewStyleInsetGrouped];
 	if(self)
 	{
 		[self loadAppInfos];
@@ -410,10 +410,6 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 	{
 		cell.imageView.image = _placeholderIcon;
 	}
-
-	cell.preservesSuperviewLayoutMargins = NO;
-	cell.separatorInset = UIEdgeInsetsZero;
-	cell.layoutMargins = UIEdgeInsetsZero;
 
 	NSString* sourceType = appId ? [trollStoreUserDefaults() objectForKey:TSAppInstallSourceTypesDefaultsKey][appId] : nil;
 	if(sourceType)

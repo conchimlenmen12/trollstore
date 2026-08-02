@@ -16,8 +16,14 @@
 
 	UINavigationController* appNavigationController = [[UINavigationController alloc] initWithRootViewController:appTableVC];
 	UINavigationController* settingsNavigationController = [[UINavigationController alloc] initWithRootViewController:settingsListVC];
-	
-	appNavigationController.tabBarItem.image = [UIImage systemImageNamed:@"square.stack.3d.up.fill"];
+
+	appNavigationController.navigationBar.prefersLargeTitles = YES;
+	appTableVC.navigationItem.largeTitleDisplayMode = UINavigationItemLargeTitleDisplayModeAlways;
+
+	settingsNavigationController.navigationBar.prefersLargeTitles = YES;
+	settingsListVC.navigationItem.largeTitleDisplayMode = UINavigationItemLargeTitleDisplayModeAlways;
+
+	appNavigationController.tabBarItem.image = [UIImage systemImageNamed:@"square.grid.2x2.fill"];
 	settingsNavigationController.tabBarItem.image = [UIImage systemImageNamed:@"gear"];
 
 	self.title = @"Root View Controller";

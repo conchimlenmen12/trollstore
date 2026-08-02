@@ -15,7 +15,7 @@
 	iconView.translatesAutoresizingMaskIntoConstraints = NO;
 
 	UILabel* titleLabel = [[UILabel alloc] init];
-	titleLabel.text = @"Chào mừng đến với CheatiOSVipStore";
+	titleLabel.text = @"Chào mừng đến với CheatTrollStore";
 	titleLabel.font = [UIFont boldSystemFontOfSize:22];
 	titleLabel.textColor = UIColor.labelColor;
 	titleLabel.textAlignment = NSTextAlignmentCenter;

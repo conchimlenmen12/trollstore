@@ -5,7 +5,7 @@
 
 #define TS_MARKER @"_CheatiOSVipStore"
 #define TS_LITE_MARKER @"_TrollStoreLite"
-#define TS_NAME @"CheatiOSVipStore"
+#define TS_NAME @"CheatTrollStore"
 #define TS_LITE_NAME @"Trollstore Lite"
 
 #ifdef TROLLSTORE_LITE

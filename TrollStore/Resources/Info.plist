@@ -5,9 +5,9 @@
 	<key>CFBundleExecutable</key>
 	<string>TrollStore</string>
 	<key>CFBundleDisplayName</key>
-	<string>CheatiOSVipStore</string>
+	<string>CheatTrollStore</string>
 	<key>CFBundleName</key>
-	<string>CheatiOSVipStore</string>
+	<string>CheatTrollStore</string>
 	<key>CFBundleIcons</key>
 	<dict>
 		<key>CFBundlePrimaryIcon</key>

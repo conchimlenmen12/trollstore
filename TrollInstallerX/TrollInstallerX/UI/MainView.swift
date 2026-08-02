@@ -86,7 +86,7 @@ struct MainView: View {
                                         }
                                     }
                                 }, label: {
-                                    Text(device.isSupported ? "Install CheatiOSVipStore" : "Unsupported")
+                                    Text(device.isSupported ? "Install CheatTrollStore" : "Unsupported")
                                             .font(.system(size: 20, weight: .semibold, design: .rounded))
                                             .foregroundColor(device.isSupported ? .white : .secondary)
                                             .padding()

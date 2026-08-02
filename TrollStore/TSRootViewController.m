@@ -2,9 +2,13 @@
 #import "TSAppTableViewController.h"
 #import "TSCleanTrashViewController.h"
 #import "TSSettingsListController.h"
+#import "TSAnnouncementViewController.h"
 #import <TSPresentationDelegate.h>
 
 @implementation TSRootViewController
+{
+	BOOL _hasShownAnnouncement;
+}
 
 - (void)loadView {
 	[super loadView];
@@ -40,6 +44,20 @@
 	[super viewDidLoad];
 
 	TSPresentationDelegate.presentationViewController = self;
+}
+
+- (void)viewDidAppear:(BOOL)animated
+{
+	[super viewDidAppear:animated];
+
+	if(!_hasShownAnnouncement)
+	{
+		_hasShownAnnouncement = YES;
+
+		TSAnnouncementViewController* announcementVC = [[TSAnnouncementViewController alloc] init];
+		announcementVC.modalPresentationStyle = UIModalPresentationPageSheet;
+		[self presentViewController:announcementVC animated:YES completion:nil];
+	}
 }
 
 @end

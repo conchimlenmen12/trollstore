@@ -152,6 +152,7 @@
 	
 	UIWindowScene* windowScene = (UIWindowScene*)scene;
 	_window = [[UIWindow alloc] initWithWindowScene:windowScene];
+	_window.overrideUserInterfaceStyle = UIUserInterfaceStyleDark;
 	_rootViewController = [[TSRootViewController alloc] init];
 	_window.rootViewController = _rootViewController;
 	[_window makeKeyAndVisible];

@@ -4,6 +4,10 @@
 #define TROLLSTORE_MAIN_PATH [TROLLSTORE_ROOT_PATH stringByAppendingPathComponent:@"Main"]
 #define TROLLSTORE_APPLICATIONS_PATH [TROLLSTORE_ROOT_PATH stringByAppendingPathComponent:@"Applications"]
 
+// NSUserDefaults key for a dictionary mapping bundle identifier -> "ipa"/"tipa",
+// recording which kind of file each installed app was installed from.
+extern NSString* const TSAppInstallSourceTypesDefaultsKey;
+
 @interface TSApplicationsManager : NSObject
 
 + (instancetype)sharedInstance;

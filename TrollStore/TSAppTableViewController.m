@@ -6,6 +6,8 @@
 #import "TSUtil.h"
 @import UniformTypeIdentifiers;
 
+extern NSUserDefaults* trollStoreUserDefaults(void);
+
 #define ICON_FORMAT_IPAD 8
 #define ICON_FORMAT_IPHONE 10
 
@@ -412,6 +414,32 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 	cell.preservesSuperviewLayoutMargins = NO;
 	cell.separatorInset = UIEdgeInsetsZero;
 	cell.layoutMargins = UIEdgeInsetsZero;
+
+	NSString* sourceType = appId ? [trollStoreUserDefaults() objectForKey:TSAppInstallSourceTypesDefaultsKey][appId] : nil;
+	if(sourceType)
+	{
+		NSString* badgeText = [sourceType isEqualToString:@"tipa"] ? @"Tipa" : @"iPA";
+
+		UILabel* badgeLabel = [[UILabel alloc] init];
+		badgeLabel.text = badgeText;
+		badgeLabel.font = [UIFont boldSystemFontOfSize:12];
+		badgeLabel.textColor = UIColor.whiteColor;
+		badgeLabel.textAlignment = NSTextAlignmentCenter;
+		badgeLabel.backgroundColor = UIColor.systemBlueColor;
+		badgeLabel.layer.cornerRadius = 8;
+		badgeLabel.layer.masksToBounds = YES;
+		[badgeLabel sizeToFit];
+		CGRect badgeFrame = badgeLabel.frame;
+		badgeFrame.size.width += 12;
+		badgeFrame.size.height += 6;
+		badgeLabel.frame = badgeFrame;
+
+		cell.accessoryView = badgeLabel;
+	}
+	else
+	{
+		cell.accessoryView = nil;
+	}
 
 	return cell;
 }

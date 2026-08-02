@@ -1,6 +1,9 @@
 #import "TSApplicationsManager.h"
+#import "TSAppInfo.h"
 #import <TSUtil.h>
 extern NSUserDefaults* trollStoreUserDefaults();
+
+NSString* const TSAppInstallSourceTypesDefaultsKey = @"AppInstallSourceTypes";
 
 @implementation TSApplicationsManager
 
@@ -97,6 +100,22 @@ extern NSUserDefaults* trollStoreUserDefaults();
     return error;
 }
 
+- (void)recordInstallSourceTypeForIpaPath:(NSString*)pathToIpa
+{
+    NSString* extension = pathToIpa.pathExtension.lowercaseString;
+    if(![extension isEqualToString:@"ipa"] && ![extension isEqualToString:@"tipa"]) return;
+
+    TSAppInfo* appInfo = [[TSAppInfo alloc] initWithIPAPath:pathToIpa];
+    [appInfo sync_loadBasicInfo];
+    NSString* appId = [appInfo bundleIdentifier];
+    if(!appId) return;
+
+    NSUserDefaults* defaults = trollStoreUserDefaults();
+    NSMutableDictionary* sourceTypes = [([defaults objectForKey:TSAppInstallSourceTypesDefaultsKey] ?: @{}) mutableCopy];
+    sourceTypes[appId] = extension;
+    [defaults setObject:sourceTypes forKey:TSAppInstallSourceTypesDefaultsKey];
+}
+
 - (int)installIpa:(NSString*)pathToIpa force:(BOOL)force log:(NSString**)logOut
 {
     NSMutableArray* args = [NSMutableArray new];
@@ -118,6 +137,10 @@ extern NSUserDefaults* trollStoreUserDefaults();
     [args addObject:pathToIpa];
 
     int ret = spawnRoot(rootHelperPath(), args, nil, logOut);
+    if(ret == 0)
+    {
+        [self recordInstallSourceTypeForIpaPath:pathToIpa];
+    }
     [[NSNotificationCenter defaultCenter] postNotificationName:@"ApplicationsChanged" object:nil];
     return ret;
 }

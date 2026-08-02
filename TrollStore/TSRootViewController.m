@@ -30,8 +30,11 @@
 	settingsNavigationController.navigationBar.prefersLargeTitles = YES;
 	settingsListVC.navigationItem.largeTitleDisplayMode = UINavigationItemLargeTitleDisplayModeAlways;
 
+	// broom(.fill) was only added in SF Symbols 4 / iOS 16, fall back to the trash icon on older versions
+	UIImage* cleanTrashIcon = [UIImage systemImageNamed:@"broom.fill"] ?: [UIImage systemImageNamed:@"trash.circle.fill"];
+
 	appNavigationController.tabBarItem.image = [UIImage systemImageNamed:@"square.grid.2x2.fill"];
-	cleanTrashNavigationController.tabBarItem.image = [UIImage systemImageNamed:@"trash.circle.fill"];
+	cleanTrashNavigationController.tabBarItem.image = cleanTrashIcon;
 	settingsNavigationController.tabBarItem.image = [UIImage systemImageNamed:@"gear"];
 
 	self.title = @"Root View Controller";

@@ -15,7 +15,7 @@
 	iconView.translatesAutoresizingMaskIntoConstraints = NO;
 
 	UILabel* titleLabel = [[UILabel alloc] init];
-	titleLabel.text = @"Chào mừng đến với CheatTrollStore";
+	titleLabel.text = self.announcementTitle ?: @"Chào mừng đến với CheatTrollStore";
 	titleLabel.font = [UIFont boldSystemFontOfSize:22];
 	titleLabel.textColor = UIColor.labelColor;
 	titleLabel.textAlignment = NSTextAlignmentCenter;
@@ -23,13 +23,13 @@
 	titleLabel.translatesAutoresizingMaskIntoConstraints = NO;
 
 	UILabel* subtitleLabel = [[UILabel alloc] init];
-	subtitleLabel.text = @"Tham Gia Cộng Đồng:";
+	subtitleLabel.text = self.announcementSubtitle ?: @"Tham Gia Cộng Đồng:";
 	subtitleLabel.font = [UIFont systemFontOfSize:15];
 	subtitleLabel.textColor = UIColor.secondaryLabelColor;
 	subtitleLabel.translatesAutoresizingMaskIntoConstraints = NO;
 
 	UIButton* linkButton = [UIButton buttonWithType:UIButtonTypeSystem];
-	[linkButton setTitle:@"Tại đây" forState:UIControlStateNormal];
+	[linkButton setTitle:(self.linkText ?: @"Tại đây") forState:UIControlStateNormal];
 	linkButton.titleLabel.font = [UIFont boldSystemFontOfSize:15];
 	[linkButton addTarget:self action:@selector(communityLinkPressed) forControlEvents:UIControlEventTouchUpInside];
 	linkButton.translatesAutoresizingMaskIntoConstraints = NO;
@@ -46,7 +46,7 @@
 	stack.translatesAutoresizingMaskIntoConstraints = NO;
 
 	UIButton* closeButton = [UIButton buttonWithType:UIButtonTypeSystem];
-	[closeButton setTitle:@"Đóng" forState:UIControlStateNormal];
+	[closeButton setTitle:(self.closeButtonText ?: @"Đóng") forState:UIControlStateNormal];
 	closeButton.titleLabel.font = [UIFont boldSystemFontOfSize:17];
 	closeButton.backgroundColor = UIColor.systemBlueColor;
 	[closeButton setTitleColor:UIColor.whiteColor forState:UIControlStateNormal];
@@ -81,7 +81,7 @@
 
 - (void)communityLinkPressed
 {
-	NSURL* url = [NSURL URLWithString:@"https://t.me/crackcyipa"];
+	NSURL* url = [NSURL URLWithString:(self.linkURLString ?: @"https://t.me/crackcyipa")];
 	if(url)
 	{
 		[[UIApplication sharedApplication] openURL:url options:@{} completionHandler:nil];

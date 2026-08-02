@@ -5,7 +5,6 @@
 #import <TSPresentationDelegate.h>
 #import "TSInstallationController.h"
 #import "TSSettingsAdvancedListController.h"
-#import "TSDonateListController.h"
 #import "TSAnimatedGIF.h"
 
 @interface NSUserDefaults (Private)
@@ -357,17 +356,6 @@ extern NSUserDefaults* trollStoreUserDefaults(void);
 		advancedLinkSpecifier.detailControllerClass = [TSSettingsAdvancedListController class];
 		[advancedLinkSpecifier setProperty:@YES forKey:@"enabled"];
 		[_specifiers addObject:advancedLinkSpecifier];
-
-		PSSpecifier* donateSpecifier = [PSSpecifier preferenceSpecifierNamed:@"Donate"
-										target:self
-										set:nil
-										get:nil
-										detail:nil
-										cell:PSLinkListCell
-										edit:nil];
-		donateSpecifier.detailControllerClass = [TSDonateListController class];
-		[donateSpecifier setProperty:@YES forKey:@"enabled"];
-		[_specifiers addObject:donateSpecifier];
 
 #ifndef TROLLSTORE_LITE
 		// Uninstall TrollStore

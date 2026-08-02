@@ -5,7 +5,7 @@
 #import <TSPresentationDelegate.h>
 #import "TSInstallationController.h"
 #import "TSSettingsAdvancedListController.h"
-#import "TSAnimatedGIF.h"
+#import "TSHahaSticker.h"
 
 @interface NSUserDefaults (Private)
 - (instancetype)_initWithSuiteName:(NSString *)suiteName container:(NSURL *)container;
@@ -20,7 +20,7 @@ extern NSUserDefaults* trollStoreUserDefaults(void);
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadSpecifiers) name:UIApplicationWillEnterForegroundNotification object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadSpecifiers) name:@"TrollStoreReloadSettingsNotification" object:nil];
 
-	UIBarButtonItem* hahaButton = animatedGIFBarButtonItem(@"Haha", 32);
+	UIBarButtonItem* hahaButton = hahaStickerBarButtonItem(32);
 	if(hahaButton) self.navigationItem.rightBarButtonItem = hahaButton;
 
 #ifndef TROLLSTORE_LITE

@@ -2,7 +2,7 @@
 #import "TSFileCleanerManager.h"
 #import <TSPresentationDelegate.h>
 #import <TSUtil.h>
-#import "TSAnimatedGIF.h"
+#import "TSHahaSticker.h"
 
 @interface TSCleanTrashViewController ()
 {
@@ -43,7 +43,7 @@
 	NSMutableArray* rightItems = [NSMutableArray arrayWithObjects:moreButton, scanButton, nil];
 	if([_path isEqualToString:@"/var"])
 	{
-		UIBarButtonItem* hahaButton = animatedGIFBarButtonItem(@"Haha", 32);
+		UIBarButtonItem* hahaButton = hahaStickerBarButtonItem(32);
 		if(hahaButton) [rightItems insertObject:hahaButton atIndex:0];
 	}
 	self.navigationItem.rightBarButtonItems = rightItems;

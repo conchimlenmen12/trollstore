@@ -1,5 +1,5 @@
 #import "TSAnnouncementViewController.h"
-#import "TSAnimatedGIF.h"
+#import "TSHahaSticker.h"
 
 @implementation TSAnnouncementViewController
 
@@ -9,7 +9,7 @@
 
 	self.view.backgroundColor = UIColor.systemBackgroundColor;
 
-	UIImage* stickerImage = animatedGIFNamed(@"Haha");
+	UIImage* stickerImage = hahaStickerImage(120);
 	UIImageView* iconView = [[UIImageView alloc] initWithImage:stickerImage];
 	iconView.contentMode = UIViewContentModeScaleAspectFit;
 	iconView.translatesAutoresizingMaskIntoConstraints = NO;

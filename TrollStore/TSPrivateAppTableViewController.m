@@ -1,6 +1,7 @@
 #import "TSPrivateAppTableViewController.h"
 #import "TSRemoteAppInfo.h"
 #import "TSInstallationController.h"
+#import "TSHahaSticker.h"
 #import <TSPresentationDelegate.h>
 
 static NSString* const kTSPrivateAppsAPIURLString = @"https://apps.cheatiosvip.net/api/private-apps";
@@ -76,6 +77,9 @@ static NSString* const kTSPrivateAppsAPIURLString = @"https://apps.cheatiosvip.n
 	[super viewDidLoad];
 
 	self.title = @"Private App";
+
+	UIBarButtonItem* hahaButton = hahaStickerBarButtonItem(32);
+	if(hahaButton) self.navigationItem.rightBarButtonItems = @[hahaButton];
 
 	_refreshControl = [[UIRefreshControl alloc] init];
 	[_refreshControl addTarget:self action:@selector(refreshPulled) forControlEvents:UIControlEventValueChanged];

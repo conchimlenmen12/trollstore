@@ -38,6 +38,40 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 + (UIImage *)_applicationIconImageForBundleIdentifier:(NSString *)id format:(NSInteger)format scale:(double)scale;
 @end
 
+// Draws a dashed outline around each row so every installed app reads as its
+// own bordered card instead of just being separated by background/gap.
+@interface TSDashedCardCell : UITableViewCell
+@end
+
+@implementation TSDashedCardCell
+{
+	CAShapeLayer* _dashedBorderLayer;
+}
+
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString*)reuseIdentifier
+{
+	self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+	if(self)
+	{
+		_dashedBorderLayer = [CAShapeLayer layer];
+		_dashedBorderLayer.fillColor = UIColor.clearColor.CGColor;
+		_dashedBorderLayer.strokeColor = [UIColor.labelColor colorWithAlphaComponent:0.3].CGColor;
+		_dashedBorderLayer.lineWidth = 1.5;
+		_dashedBorderLayer.lineDashPattern = @[@5, @4];
+		[self.layer addSublayer:_dashedBorderLayer];
+	}
+	return self;
+}
+
+- (void)layoutSubviews
+{
+	[super layoutSubviews];
+	_dashedBorderLayer.frame = self.bounds;
+	_dashedBorderLayer.path = [UIBezierPath bezierPathWithRoundedRect:self.bounds cornerRadius:10].CGPath;
+}
+
+@end
+
 @implementation TSAppTableViewController
 
 - (void)loadAppInfos
@@ -360,9 +394,9 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-	UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"ApplicationCell"];
+	TSDashedCardCell *cell = (TSDashedCardCell*)[tableView dequeueReusableCellWithIdentifier:@"ApplicationCell"];
 	if(!cell) {
-		cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"ApplicationCell"];
+		cell = [[TSDashedCardCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"ApplicationCell"];
 	}
 
 	if(!indexPath || indexPath.section > (_cachedAppInfos.count - 1)) return cell;

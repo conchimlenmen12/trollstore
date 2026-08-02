@@ -31,7 +31,7 @@
 	settingsListVC.navigationItem.largeTitleDisplayMode = UINavigationItemLargeTitleDisplayModeAlways;
 
 	appNavigationController.tabBarItem.image = [UIImage systemImageNamed:@"square.grid.2x2.fill"];
-	cleanTrashNavigationController.tabBarItem.image = [UIImage systemImageNamed:@"trash.fill"];
+	cleanTrashNavigationController.tabBarItem.image = [UIImage systemImageNamed:@"trash.circle.fill"];
 	settingsNavigationController.tabBarItem.image = [UIImage systemImageNamed:@"gear"];
 
 	self.title = @"Root View Controller";

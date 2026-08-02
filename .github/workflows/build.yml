@@ -6,7 +6,7 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  build-trollstore:
     runs-on: macos-latest
     steps:
       - name: Checkout
@@ -45,6 +45,12 @@ jobs:
           export THEOS="$HOME/theos"
           make
 
+      - name: Upload TrollStore.tar for TrollInstallerX
+        uses: actions/upload-artifact@v4
+        with:
+          name: TrollStore-tar
+          path: _build/TrollStore.tar
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -52,3 +58,39 @@ jobs:
           path: |
             _build/TrollStore.tar
             TrollStoreLite/packages/*.deb
+
+  build-trollinstallerx:
+    needs: build-trollstore
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: TrollInstallerX
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download freshly built TrollStore.tar
+        uses: actions/download-artifact@v4
+        with:
+          name: TrollStore-tar
+          path: TrollInstallerX/TrollInstallerX/Resources
+
+      - name: Install ldid
+        run: brew install ldid
+
+      - name: Build IPA
+        run: |
+          xcodebuild -configuration Release -derivedDataPath DerivedData/TrollInstallerX -destination 'generic/platform=iOS' -scheme TrollInstallerX CODE_SIGNING_ALLOWED="NO" CODE_SIGNING_REQUIRED="NO" CODE_SIGN_IDENTITY=""
+          cp Resources/ents.plist DerivedData/TrollInstallerX/Build/Products/Release-iphoneos/
+          cd DerivedData/TrollInstallerX/Build/Products/Release-iphoneos
+          mkdir Payload
+          cp -r TrollInstallerX.app Payload
+          ldid -Sents.plist Payload/TrollInstallerX.app
+          zip -qry TrollInstallerX.ipa Payload
+          cp TrollInstallerX.ipa "$GITHUB_WORKSPACE/TrollInstallerX/"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TrollInstallerX-ipa
+          path: TrollInstallerX/TrollInstallerX.ipa

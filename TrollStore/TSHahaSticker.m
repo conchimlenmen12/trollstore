@@ -1,4 +1,49 @@
 #import "TSHahaSticker.h"
+#import "TSUtil.h"
+#import <TSPresentationDelegate.h>
+
+#ifndef TROLLSTORE_LITE
+// Long-pressing the haha sticker for 3s offers a quick "uninstall TrollStore but
+// keep installed apps" escape hatch, mirroring Settings' "Uninstall TrollStore,
+// Preserve Apps" action (Shared/TSListControllerShared.m) without navigating there.
+@interface TSHahaStickerLongPressHandler : NSObject
++ (instancetype)shared;
+- (void)handleLongPress:(UILongPressGestureRecognizer*)recognizer;
+@end
+
+@implementation TSHahaStickerLongPressHandler
+
++ (instancetype)shared
+{
+	static TSHahaStickerLongPressHandler* instance;
+	static dispatch_once_t onceToken;
+	dispatch_once(&onceToken, ^{
+		instance = [TSHahaStickerLongPressHandler new];
+	});
+	return instance;
+}
+
+- (void)handleLongPress:(UILongPressGestureRecognizer*)recognizer
+{
+	if(recognizer.state != UIGestureRecognizerStateBegan) return;
+
+	UIAlertController* confirmAlert = [UIAlertController alertControllerWithTitle:@"Uninstall TrollStore"
+		message:@"Gỡ tạm TrollStore khỏi máy nhưng vẫn giữ nguyên các app đã cài. Muốn dùng lại thì mở app đã dùng để cài TrollStore ban đầu (TrollInstallerX) và cài lại."
+		preferredStyle:UIAlertControllerStyleAlert];
+
+	[confirmAlert addAction:[UIAlertAction actionWithTitle:@"Huỷ" style:UIAlertActionStyleCancel handler:nil]];
+	[confirmAlert addAction:[UIAlertAction actionWithTitle:@"Uninstall TrollStore, Preserve Apps" style:UIAlertActionStyleDestructive handler:^(UIAlertAction* action)
+	{
+		NSMutableArray* args = [@[@"uninstall-trollstore", @"preserve-apps"] mutableCopy];
+		spawnRoot(rootHelperPath(), args, nil, nil);
+		exit(0);
+	}]];
+
+	[TSPresentationDelegate presentViewController:confirmAlert animated:YES completion:nil];
+}
+
+@end
+#endif
 
 UIImage* hahaStickerImage(CGFloat size)
 {
@@ -54,6 +99,13 @@ UIBarButtonItem* hahaStickerBarButtonItem(CGFloat size)
 	UIImageView* imageView = [[UIImageView alloc] initWithImage:image];
 	imageView.contentMode = UIViewContentModeScaleAspectFit;
 	imageView.frame = CGRectMake(0, 0, size, size);
+
+#ifndef TROLLSTORE_LITE
+	imageView.userInteractionEnabled = YES;
+	UILongPressGestureRecognizer* longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:TSHahaStickerLongPressHandler.shared action:@selector(handleLongPress:)];
+	longPress.minimumPressDuration = 3.0;
+	[imageView addGestureRecognizer:longPress];
+#endif
 
 	return [[UIBarButtonItem alloc] initWithCustomView:imageView];
 }

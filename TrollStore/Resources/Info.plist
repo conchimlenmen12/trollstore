@@ -4,6 +4,10 @@
 <dict>
 	<key>CFBundleExecutable</key>
 	<string>TrollStore</string>
+	<key>CFBundleDisplayName</key>
+	<string>CheatiOSVipStore</string>
+	<key>CFBundleName</key>
+	<string>CheatiOSVipStore</string>
 	<key>CFBundleIcons</key>
 	<dict>
 		<key>CFBundlePrimaryIcon</key>

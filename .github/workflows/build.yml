@@ -43,7 +43,7 @@ jobs:
       - name: Build TrollStore
         run: |
           export THEOS="$HOME/theos"
-          make
+          make pre_build make_fastPathSign make_roothelper make_trollstore make_trollhelper_embedded make_trollhelper_package assemble_trollstore make_trollstore_lite
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -51,6 +51,4 @@ jobs:
           name: TrollStore-build
           path: |
             _build/TrollStore.tar
-            _build/TrollHelper_iOS15.ipa
-            _build/TrollHelper_arm64e.ipa
             TrollStoreLite/packages/*.deb

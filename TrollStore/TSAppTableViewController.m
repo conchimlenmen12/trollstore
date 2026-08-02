@@ -54,6 +54,16 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 	self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
 	if(self)
 	{
+		self.backgroundColor = UIColor.clearColor;
+		self.contentView.backgroundColor = UIColor.clearColor;
+
+		UIBlurEffect* glassEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleSystemUltraThinMaterialDark];
+		UIVisualEffectView* glassView = [[UIVisualEffectView alloc] initWithEffect:glassEffect];
+		glassView.layer.cornerRadius = 10;
+		glassView.layer.cornerCurve = kCACornerCurveContinuous;
+		glassView.layer.masksToBounds = YES;
+		self.backgroundView = glassView;
+
 		_dashedBorderLayer = [CAShapeLayer layer];
 		_dashedBorderLayer.fillColor = UIColor.clearColor.CGColor;
 		_dashedBorderLayer.strokeColor = [UIColor.labelColor colorWithAlphaComponent:0.3].CGColor;

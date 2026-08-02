@@ -2,6 +2,7 @@
 #import "TSFileCleanerManager.h"
 #import <TSPresentationDelegate.h>
 #import <TSUtil.h>
+#import "TSAnimatedGIF.h"
 
 @interface TSCleanTrashViewController ()
 {
@@ -38,7 +39,14 @@
 
 	UIBarButtonItem* scanButton = [[UIBarButtonItem alloc] initWithImage:[UIImage systemImageNamed:@"magnifyingglass"] style:UIBarButtonItemStylePlain target:self action:@selector(scanJunkPressed)];
 	UIBarButtonItem* moreButton = [[UIBarButtonItem alloc] initWithImage:[UIImage systemImageNamed:@"ellipsis.circle"] style:UIBarButtonItemStylePlain target:self action:@selector(morePressed)];
-	self.navigationItem.rightBarButtonItems = @[moreButton, scanButton];
+
+	NSMutableArray* rightItems = [NSMutableArray arrayWithObjects:moreButton, scanButton, nil];
+	if([_path isEqualToString:@"/var"])
+	{
+		UIBarButtonItem* hahaButton = animatedGIFBarButtonItem(@"Haha", 32);
+		if(hahaButton) [rightItems insertObject:hahaButton atIndex:0];
+	}
+	self.navigationItem.rightBarButtonItems = rightItems;
 
 	[self reloadEntries];
 }

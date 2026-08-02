@@ -7,7 +7,7 @@ include $(THEOS)/makefiles/common.mk
 APPLICATION_NAME = TrollStoreLite
 
 TrollStoreLite_FILES = $(wildcard ../TrollStore/*.m) $(wildcard ../Shared/*.m)
-TrollStoreLite_FRAMEWORKS = UIKit CoreGraphics CoreServices CoreTelephony
+TrollStoreLite_FRAMEWORKS = UIKit CoreGraphics CoreServices CoreTelephony ImageIO
 TrollStoreLite_PRIVATE_FRAMEWORKS = Preferences MobileIcons MobileContainerManager
 TrollStoreLite_LIBRARIES = archive
 TrollStoreLite_CFLAGS = -fobjc-arc -I../Shared -I$(shell brew --prefix)/opt/libarchive/include -DTROLLSTORE_LITE

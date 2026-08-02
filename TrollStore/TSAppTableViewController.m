@@ -4,6 +4,7 @@
 #import <TSPresentationDelegate.h>
 #import "TSInstallationController.h"
 #import "TSUtil.h"
+#import "TSAnimatedGIF.h"
 @import UniformTypeIdentifiers;
 
 extern NSUserDefaults* trollStoreUserDefaults(void);
@@ -198,7 +199,8 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 
 	UIBarButtonItem* installBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage systemImageNamed:@"plus"] menu:installMenu];
 	
-	self.navigationItem.rightBarButtonItems = @[installBarButtonItem];
+	UIBarButtonItem* hahaButton = animatedGIFBarButtonItem(@"Haha", 32);
+	self.navigationItem.rightBarButtonItems = hahaButton ? @[hahaButton, installBarButtonItem] : @[installBarButtonItem];
 }
 
 - (void)_setUpSearchBar

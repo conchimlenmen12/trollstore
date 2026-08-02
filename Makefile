@@ -1,6 +1,6 @@
 TOPTARGETS := all clean update
 
-$(TOPTARGETS): pre_build make_fastPathSign make_roothelper make_trollstore make_trollhelper_embedded make_trollhelper_package assemble_trollstore build_installer15 build_installer64e make_trollstore_lite
+$(TOPTARGETS): pre_build make_fastPathSign make_roothelper make_trollstore make_trollhelper_embedded make_trollhelper_package assemble_trollstore make_trollstore_lite
 
 pre_build:
 	@rm -rf ./_build 2>/dev/null || true

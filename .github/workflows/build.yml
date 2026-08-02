@@ -43,7 +43,7 @@ jobs:
       - name: Build TrollStore
         run: |
           export THEOS="$HOME/theos"
-          make pre_build make_fastPathSign make_roothelper make_trollstore make_trollhelper_embedded make_trollhelper_package assemble_trollstore make_trollstore_lite
+          make
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4

@@ -25,9 +25,7 @@
 	cleanTrashVC.navigationItem.largeTitleDisplayMode = UINavigationItemLargeTitleDisplayModeNever;
 	settingsListVC.navigationItem.largeTitleDisplayMode = UINavigationItemLargeTitleDisplayModeNever;
 
-	// broom(.fill) was only added in SF Symbols 4 / iOS 16, fall back to a flat (no-background)
-	// trash icon on older versions so it still matches the other two tabs' flat style
-	UIImage* cleanTrashIcon = [UIImage systemImageNamed:@"broom.fill"] ?: [UIImage systemImageNamed:@"trash.fill"];
+	UIImage* cleanTrashIcon = [UIImage systemImageNamed:@"archivebox.fill"];
 
 	appNavigationController.tabBarItem.image = [UIImage systemImageNamed:@"square.grid.2x2.fill"];
 	cleanTrashNavigationController.tabBarItem.image = cleanTrashIcon;

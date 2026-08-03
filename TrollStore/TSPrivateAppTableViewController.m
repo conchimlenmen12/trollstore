@@ -364,14 +364,28 @@ static NSString* updatedAtDisplayStringForISOString(NSString* isoString)
 	[task resume];
 }
 
-// Not installed -> "Cài đặt". Installed and the recorded install source still matches
-// the server entry (or we have no record of it, e.g. installed before this tracking
-// existed) -> "Mở". Installed but the server's file/link changed since -> "Cập nhật".
+// Not installed -> "Cài đặt". Installed and unchanged since -> "Mở". Installed but the
+// server entry changed since -> "Cập nhật". "Changed" is decided two ways:
+//  1) the downloadURL differs from the one recorded the last time this bundle id was
+//     installed/updated through this tab (catches any file/link swap, no version bump needed).
+//  2) if we have no such record at all (app was installed some other way, e.g. before this
+//     tracking existed, or by dropping the file straight into TrollStore) — fall back to
+//     comparing the installed build's CFBundleVersion against the catalog's version field.
 - (BOOL)appHasUpdate:(TSRemoteAppInfo*)app
 {
 	NSString* recordedURL = [self recordedDownloadURLForBundleId:app.bundleId];
-	if(recordedURL.length == 0) return NO;
-	return ![recordedURL isEqualToString:app.downloadURLString];
+	if(recordedURL.length > 0)
+	{
+		return ![recordedURL isEqualToString:app.downloadURLString];
+	}
+
+	NSString* installedVersion = [self installedVersionForBundleId:app.bundleId];
+	if(installedVersion.length && app.version.length)
+	{
+		return ![installedVersion isEqualToString:app.version];
+	}
+
+	return NO;
 }
 
 - (NSString*)actionTitleForApp:(TSRemoteAppInfo*)app

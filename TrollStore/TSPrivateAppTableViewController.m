@@ -306,8 +306,6 @@ static NSString* updatedAtDisplayStringForISOString(NSString* isoString)
 	cell.textLabel.text = app.name;
 	cell.detailTextLabel.text = app.bundleId.length ? [NSString stringWithFormat:@"%@ • %@", app.version, app.bundleId] : app.version;
 	[cell setUpdatedAtText:updatedAtDisplayStringForISOString(app.updatedAtString)];
-	cell.imageView.layer.borderWidth = 1;
-	cell.imageView.layer.borderColor = [UIColor.labelColor colorWithAlphaComponent:0.1].CGColor;
 	cell.imageView.layer.cornerRadius = 13.5;
 	cell.imageView.layer.masksToBounds = YES;
 	cell.imageView.layer.cornerCurve = kCACornerCurveContinuous;

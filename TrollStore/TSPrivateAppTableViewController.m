@@ -13,15 +13,39 @@ static NSString* const kTSPrivateAppInstalledSourcesDefaultsKey = @"PrivateAppIn
 
 extern NSUserDefaults* trollStoreUserDefaults(void);
 
+// "Cập nhật: dd/MM/yyyy HH:mm" from the server's updatedAt (falls back to addedAt) —
+// a fixed point in time, not a running counter, since it's about the catalog entry
+// on the server rather than anything happening on this device.
+static NSString* updatedAtDisplayStringForISOString(NSString* isoString)
+{
+	if(isoString.length == 0) return nil;
+
+	static NSISO8601DateFormatter* isoFormatter;
+	static NSDateFormatter* displayFormatter;
+	static dispatch_once_t onceToken;
+	dispatch_once(&onceToken, ^{
+		isoFormatter = [NSISO8601DateFormatter new];
+		displayFormatter = [NSDateFormatter new];
+		displayFormatter.dateFormat = @"dd/MM/yyyy HH:mm";
+	});
+
+	NSDate* date = [isoFormatter dateFromString:isoString];
+	if(!date) return nil;
+
+	return [NSString stringWithFormat:@"Cập nhật: %@", [displayFormatter stringFromDate:date]];
+}
+
 // Same visual language as TSAppTableViewController's card cell, duplicated under a
 // distinct class name since Objective-C classes are linked globally even when the
 // @interface is private to a .m file.
 @interface TSPrivateAppCardCell : UITableViewCell
+- (void)setUpdatedAtText:(NSString*)text;
 @end
 
 @implementation TSPrivateAppCardCell
 {
 	CAShapeLayer* _dashedBorderLayer;
+	UILabel* _updatedAtLabel;
 }
 
 - (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString*)reuseIdentifier
@@ -45,6 +69,11 @@ extern NSUserDefaults* trollStoreUserDefaults(void);
 		_dashedBorderLayer.lineWidth = 1.5;
 		_dashedBorderLayer.lineDashPattern = @[@5, @4];
 		[self.layer addSublayer:_dashedBorderLayer];
+
+		_updatedAtLabel = [[UILabel alloc] init];
+		_updatedAtLabel.font = [UIFont systemFontOfSize:12];
+		_updatedAtLabel.textColor = [UIColor.secondaryLabelColor colorWithAlphaComponent:0.85];
+		[self.contentView addSubview:_updatedAtLabel];
 	}
 	return self;
 }
@@ -54,6 +83,37 @@ extern NSUserDefaults* trollStoreUserDefaults(void);
 	[super layoutSubviews];
 	_dashedBorderLayer.frame = self.bounds;
 	_dashedBorderLayer.path = [UIBezierPath bezierPathWithRoundedRect:self.bounds cornerRadius:10].CGPath;
+
+	CGRect detailFrame = self.detailTextLabel.frame;
+	CGFloat labelX = self.textLabel.frame.origin.x;
+	CGFloat maxWidth = self.contentView.bounds.size.width - labelX - 12;
+	_updatedAtLabel.frame = CGRectMake(labelX, CGRectGetMaxY(detailFrame) + 2, MAX(maxWidth, 0), 15);
+}
+
+- (void)setUpdatedAtText:(NSString*)text
+{
+	_updatedAtLabel.hidden = (text.length == 0);
+	if(text.length == 0)
+	{
+		_updatedAtLabel.attributedText = nil;
+		return;
+	}
+
+	UIImageSymbolConfiguration* symbolConfig = [UIImageSymbolConfiguration configurationWithPointSize:11 weight:UIImageSymbolWeightSemibold];
+	UIImage* clockImage = [[UIImage systemImageNamed:@"clock.fill"] imageByApplyingSymbolConfiguration:symbolConfig];
+	clockImage = [clockImage imageWithTintColor:UIColor.systemBlueColor renderingMode:UIImageRenderingModeAlwaysOriginal];
+
+	NSTextAttachment* clockAttachment = [[NSTextAttachment alloc] init];
+	clockAttachment.image = clockImage;
+	CGFloat lineHeight = _updatedAtLabel.font.lineHeight;
+	clockAttachment.bounds = CGRectMake(0, (lineHeight - clockImage.size.height) / 2.0 - 1, clockImage.size.width, clockImage.size.height);
+
+	NSMutableAttributedString* result = [[NSAttributedString attributedStringWithAttachment:clockAttachment] mutableCopy];
+	[result appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@" %@", text]]];
+	[result addAttribute:NSFontAttributeName value:_updatedAtLabel.font range:NSMakeRange(0, result.length)];
+	[result addAttribute:NSForegroundColorAttributeName value:_updatedAtLabel.textColor range:NSMakeRange(0, result.length)];
+
+	_updatedAtLabel.attributedText = result;
 }
 
 @end
@@ -216,7 +276,7 @@ extern NSUserDefaults* trollStoreUserDefaults(void);
 
 - (CGFloat)tableView:(UITableView*)tableView heightForRowAtIndexPath:(NSIndexPath*)indexPath
 {
-	return 80.0f;
+	return 94.0f;
 }
 
 // Each app is its own section (so the dashed card gets a gap around it); the default
@@ -245,6 +305,7 @@ extern NSUserDefaults* trollStoreUserDefaults(void);
 
 	cell.textLabel.text = app.name;
 	cell.detailTextLabel.text = app.bundleId.length ? [NSString stringWithFormat:@"%@ • %@", app.version, app.bundleId] : app.version;
+	[cell setUpdatedAtText:updatedAtDisplayStringForISOString(app.updatedAtString)];
 	cell.imageView.layer.borderWidth = 1;
 	cell.imageView.layer.borderColor = [UIColor.labelColor colorWithAlphaComponent:0.1].CGColor;
 	cell.imageView.layer.cornerRadius = 13.5;

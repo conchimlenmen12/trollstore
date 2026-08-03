@@ -17,6 +17,7 @@
 	info->_bundleId = [dict[@"bundleId"] isKindOfClass:NSString.class] ? dict[@"bundleId"] : @"";
 	info->_iconURLString = [dict[@"iconURL"] isKindOfClass:NSString.class] ? dict[@"iconURL"] : @"";
 	info->_downloadURLString = downloadURLString;
+	info->_updatedAtString = [dict[@"updatedAt"] isKindOfClass:NSString.class] ? dict[@"updatedAt"] : @"";
 	return info;
 }
 

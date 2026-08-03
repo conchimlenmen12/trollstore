@@ -11,7 +11,7 @@
 
 	// While under maintenance, this screen is the only thing reachable — no swipe-to-dismiss,
 	// no tapping outside, nothing behind it to fall back to.
-	self.isModalInPresentation = self.maintenanceMode;
+	self.modalInPresentation = self.maintenanceMode;
 
 	UIImage* stickerImage = self.maintenanceMode ? maintenanceStickerImage(120) : hahaStickerImage(120);
 	UIImageView* iconView = [[UIImageView alloc] initWithImage:stickerImage];

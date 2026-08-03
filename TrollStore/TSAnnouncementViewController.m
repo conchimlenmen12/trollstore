@@ -9,6 +9,10 @@
 
 	self.view.backgroundColor = UIColor.systemBackgroundColor;
 
+	// While under maintenance, this screen is the only thing reachable — no swipe-to-dismiss,
+	// no tapping outside, nothing behind it to fall back to.
+	self.isModalInPresentation = self.maintenanceMode;
+
 	UIImage* stickerImage = self.maintenanceMode ? maintenanceStickerImage(120) : hahaStickerImage(120);
 	UIImageView* iconView = [[UIImageView alloc] initWithImage:stickerImage];
 	iconView.contentMode = UIViewContentModeScaleAspectFit;
@@ -62,7 +66,7 @@
 	stack.translatesAutoresizingMaskIntoConstraints = NO;
 
 	UIButton* closeButton = [UIButton buttonWithType:UIButtonTypeSystem];
-	[closeButton setTitle:(self.closeButtonText ?: @"Đóng") forState:UIControlStateNormal];
+	[closeButton setTitle:(self.maintenanceMode ? @"Exit" : (self.closeButtonText ?: @"Đóng")) forState:UIControlStateNormal];
 	closeButton.titleLabel.font = [UIFont boldSystemFontOfSize:17];
 	closeButton.backgroundColor = UIColor.systemBlueColor;
 	[closeButton setTitleColor:UIColor.whiteColor forState:UIControlStateNormal];
@@ -92,7 +96,15 @@
 
 - (void)closePressed
 {
-	[self dismissViewControllerAnimated:YES completion:nil];
+	if(self.maintenanceMode)
+	{
+		// No dismissing into the app while under maintenance — exit outright.
+		exit(0);
+	}
+	else
+	{
+		[self dismissViewControllerAnimated:YES completion:nil];
+	}
 }
 
 - (void)communityLinkPressed

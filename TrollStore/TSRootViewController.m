@@ -113,7 +113,10 @@ static NSString* const kTSAnnouncementConfigURLString = @"https://apps.cheatiosv
 	if([config[@"maintenance"] isKindOfClass:NSNumber.class]) announcementVC.maintenanceMode = [config[@"maintenance"] boolValue];
 	if([config[@"maintenanceReason"] isKindOfClass:NSString.class]) announcementVC.maintenanceReason = config[@"maintenanceReason"];
 
-	announcementVC.modalPresentationStyle = UIModalPresentationPageSheet;
+	// Maintenance uses a full-screen, non-interactive-dismiss presentation (see
+	// isModalInPresentation in TSAnnouncementViewController) so there's no page-sheet
+	// grabber or swipe-down hinting the app underneath is reachable.
+	announcementVC.modalPresentationStyle = announcementVC.maintenanceMode ? UIModalPresentationFullScreen : UIModalPresentationPageSheet;
 	[self presentViewController:announcementVC animated:YES completion:nil];
 }
 

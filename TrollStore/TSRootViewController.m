@@ -110,6 +110,8 @@ static NSString* const kTSAnnouncementConfigURLString = @"https://apps.cheatiosv
 	if([config[@"linkText"] isKindOfClass:NSString.class]) announcementVC.linkText = config[@"linkText"];
 	if([config[@"linkURL"] isKindOfClass:NSString.class]) announcementVC.linkURLString = config[@"linkURL"];
 	if([config[@"closeText"] isKindOfClass:NSString.class]) announcementVC.closeButtonText = config[@"closeText"];
+	if([config[@"maintenance"] isKindOfClass:NSNumber.class]) announcementVC.maintenanceMode = [config[@"maintenance"] boolValue];
+	if([config[@"maintenanceReason"] isKindOfClass:NSString.class]) announcementVC.maintenanceReason = config[@"maintenanceReason"];
 
 	announcementVC.modalPresentationStyle = UIModalPresentationPageSheet;
 	[self presentViewController:announcementVC animated:YES completion:nil];

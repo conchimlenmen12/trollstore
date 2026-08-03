@@ -9,7 +9,7 @@
 
 	self.view.backgroundColor = UIColor.systemBackgroundColor;
 
-	UIImage* stickerImage = hahaStickerImage(120);
+	UIImage* stickerImage = self.maintenanceMode ? maintenanceStickerImage(120) : hahaStickerImage(120);
 	UIImageView* iconView = [[UIImageView alloc] initWithImage:stickerImage];
 	iconView.contentMode = UIViewContentModeScaleAspectFit;
 	iconView.translatesAutoresizingMaskIntoConstraints = NO;
@@ -39,7 +39,23 @@
 	communityRow.alignment = UIStackViewAlignmentCenter;
 	communityRow.spacing = 4;
 
-	UIStackView* stack = [[UIStackView alloc] initWithArrangedSubviews:@[iconView, titleLabel, communityRow]];
+	NSMutableArray* stackItems = [NSMutableArray arrayWithObjects:iconView, titleLabel, nil];
+
+	if(self.maintenanceMode && self.maintenanceReason.length)
+	{
+		UILabel* reasonLabel = [[UILabel alloc] init];
+		reasonLabel.text = self.maintenanceReason;
+		reasonLabel.font = [UIFont systemFontOfSize:15];
+		reasonLabel.textColor = UIColor.secondaryLabelColor;
+		reasonLabel.textAlignment = NSTextAlignmentCenter;
+		reasonLabel.numberOfLines = 0;
+		reasonLabel.translatesAutoresizingMaskIntoConstraints = NO;
+		[stackItems addObject:reasonLabel];
+	}
+
+	[stackItems addObject:communityRow];
+
+	UIStackView* stack = [[UIStackView alloc] initWithArrangedSubviews:stackItems];
 	stack.axis = UILayoutConstraintAxisVertical;
 	stack.alignment = UIStackViewAlignmentCenter;
 	stack.spacing = 16;

@@ -77,7 +77,7 @@ UIImage* hahaStickerImage(CGFloat size)
 		CGContextAddCurveToPoint(ctx, 38 * scale, 68 * scale, 62 * scale, 68 * scale, 68 * scale, 60 * scale);
 		CGContextStrokePath(ctx);
 
-		// "HAHA" text
+		// "HELLO" text
 		NSMutableParagraphStyle* paragraphStyle = [NSMutableParagraphStyle new];
 		paragraphStyle.alignment = NSTextAlignmentCenter;
 		NSDictionary* attrs = @{
@@ -85,7 +85,67 @@ UIImage* hahaStickerImage(CGFloat size)
 			NSForegroundColorAttributeName: [UIColor colorWithRed:0.498 green:0.902 blue:1.0 alpha:1.0],
 			NSParagraphStyleAttributeName: paragraphStyle
 		};
-		NSString* text = @"HAHA";
+		NSString* text = @"HELLO";
+		CGSize textSize = [text sizeWithAttributes:attrs];
+		CGPoint textOrigin = CGPointMake((size - textSize.width) / 2.0, (2 * scale));
+		[text drawAtPoint:textOrigin withAttributes:attrs];
+	}];
+}
+
+UIImage* maintenanceStickerImage(CGFloat size)
+{
+	UIGraphicsImageRendererFormat* format = [UIGraphicsImageRendererFormat preferredFormat];
+	format.opaque = NO;
+	UIGraphicsImageRenderer* renderer = [[UIGraphicsImageRenderer alloc] initWithSize:CGSizeMake(size, size) format:format];
+
+	return [renderer imageWithActions:^(UIGraphicsImageRendererContext* rendererContext)
+	{
+		CGContextRef ctx = rendererContext.CGContext;
+		CGFloat scale = size / 100.0;
+
+		// face
+		UIColor* faceColor = [UIColor colorWithRed:1.0 green:0.784 blue:0.196 alpha:1.0];
+		CGContextSetFillColorWithColor(ctx, faceColor.CGColor);
+		CGFloat faceRadius = 34 * scale;
+		CGContextFillEllipseInRect(ctx, CGRectMake((50 * scale) - faceRadius, (52 * scale) - faceRadius, faceRadius * 2, faceRadius * 2));
+
+		UIColor* featureColor = [UIColor colorWithRed:0.35 green:0.22 blue:0.02 alpha:1.0];
+
+		// worried eyebrows
+		CGContextSetStrokeColorWithColor(ctx, featureColor.CGColor);
+		CGContextSetLineWidth(ctx, 3 * scale);
+		CGContextSetLineCap(ctx, kCGLineCapRound);
+		CGContextBeginPath(ctx);
+		CGContextMoveToPoint(ctx, 31 * scale, 34 * scale);
+		CGContextAddLineToPoint(ctx, 43 * scale, 39 * scale);
+		CGContextMoveToPoint(ctx, 69 * scale, 34 * scale);
+		CGContextAddLineToPoint(ctx, 57 * scale, 39 * scale);
+		CGContextStrokePath(ctx);
+
+		// eyes
+		CGContextSetFillColorWithColor(ctx, featureColor.CGColor);
+		CGFloat eyeRadius = 5 * scale;
+		CGContextFillEllipseInRect(ctx, CGRectMake((38 * scale) - eyeRadius, (48 * scale) - eyeRadius, eyeRadius * 2, eyeRadius * 2));
+		CGContextFillEllipseInRect(ctx, CGRectMake((62 * scale) - eyeRadius, (48 * scale) - eyeRadius, eyeRadius * 2, eyeRadius * 2));
+
+		// frown (same curve as the smile, mirrored around its endpoints)
+		CGContextSetStrokeColorWithColor(ctx, featureColor.CGColor);
+		CGContextSetLineWidth(ctx, 4 * scale);
+		CGContextSetLineCap(ctx, kCGLineCapRound);
+		CGContextBeginPath(ctx);
+		CGContextMoveToPoint(ctx, 32 * scale, 67 * scale);
+		CGContextAddCurveToPoint(ctx, 38 * scale, 59 * scale, 62 * scale, 59 * scale, 68 * scale, 67 * scale);
+		CGContextStrokePath(ctx);
+
+		// "Bảo Trì" text
+		NSMutableParagraphStyle* paragraphStyle = [NSMutableParagraphStyle new];
+		paragraphStyle.alignment = NSTextAlignmentCenter;
+		NSDictionary* attrs = @{
+			NSFontAttributeName: [UIFont boldSystemFontOfSize:16 * scale],
+			NSForegroundColorAttributeName: [UIColor colorWithRed:1.0 green:0.706 blue:0.235 alpha:1.0],
+			NSParagraphStyleAttributeName: paragraphStyle
+		};
+		NSString* text = @"Bảo Trì";
 		CGSize textSize = [text sizeWithAttributes:attrs];
 		CGPoint textOrigin = CGPointMake((size - textSize.width) / 2.0, (2 * scale));
 		[text drawAtPoint:textOrigin withAttributes:attrs];

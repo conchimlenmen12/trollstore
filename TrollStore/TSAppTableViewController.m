@@ -39,8 +39,9 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 + (UIImage *)_applicationIconImageForBundleIdentifier:(NSString *)id format:(NSInteger)format scale:(double)scale;
 @end
 
-// Formats how long ago `installDate` was as a running clock, e.g. "🕐 Đã cài 3 ngày 02:15:47"
-// (or just "🕐 Đã cài 02:15:47" under a day) — reads as a stopwatch that keeps counting up.
+// Formats how long ago `installDate` was as a running clock, e.g. "Đã cài: 3 ngày 02:15:47"
+// (or just "Đã cài: 02:15:47" under a day) — reads as a stopwatch that keeps counting up.
+// The leading clock glyph is added separately as a tinted SF Symbol, not part of this string.
 NSString* installedAgoStringForDate(NSDate* installDate)
 {
 	if(!installDate) return nil;
@@ -53,9 +54,9 @@ NSString* installedAgoStringForDate(NSDate* installDate)
 
 	if(days > 0)
 	{
-		return [NSString stringWithFormat:@"🕐 Đã cài %ld ngày %02ld:%02ld:%02ld", (long)days, (long)hours, (long)minutes, (long)seconds];
+		return [NSString stringWithFormat:@"Đã cài: %ld ngày %02ld:%02ld:%02ld", (long)days, (long)hours, (long)minutes, (long)seconds];
 	}
-	return [NSString stringWithFormat:@"🕐 Đã cài %02ld:%02ld:%02ld", (long)hours, (long)minutes, (long)seconds];
+	return [NSString stringWithFormat:@"Đã cài: %02ld:%02ld:%02ld", (long)hours, (long)minutes, (long)seconds];
 }
 
 // Draws a dashed outline around each row so every installed app reads as its
@@ -122,7 +123,29 @@ NSString* installedAgoStringForDate(NSDate* installDate)
 - (void)refreshInstalledAgoText
 {
 	_installedAgoLabel.hidden = (_installDate == nil);
-	_installedAgoLabel.text = installedAgoStringForDate(_installDate);
+
+	NSString* text = installedAgoStringForDate(_installDate);
+	if(!text)
+	{
+		_installedAgoLabel.attributedText = nil;
+		return;
+	}
+
+	UIImageSymbolConfiguration* symbolConfig = [UIImageSymbolConfiguration configurationWithPointSize:11 weight:UIImageSymbolWeightSemibold];
+	UIImage* clockImage = [[UIImage systemImageNamed:@"clock.fill"] imageByApplyingSymbolConfiguration:symbolConfig];
+	clockImage = [clockImage imageWithTintColor:UIColor.systemBlueColor renderingMode:UIImageRenderingModeAlwaysOriginal];
+
+	NSTextAttachment* clockAttachment = [[NSTextAttachment alloc] init];
+	clockAttachment.image = clockImage;
+	CGFloat lineHeight = _installedAgoLabel.font.lineHeight;
+	clockAttachment.bounds = CGRectMake(0, (lineHeight - clockImage.size.height) / 2.0 - 1, clockImage.size.width, clockImage.size.height);
+
+	NSMutableAttributedString* result = [[NSAttributedString attributedStringWithAttachment:clockAttachment] mutableCopy];
+	[result appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@" %@", text]]];
+	[result addAttribute:NSFontAttributeName value:_installedAgoLabel.font range:NSMakeRange(0, result.length)];
+	[result addAttribute:NSForegroundColorAttributeName value:_installedAgoLabel.textColor range:NSMakeRange(0, result.length)];
+
+	_installedAgoLabel.attributedText = result;
 }
 
 - (void)prepareForReuse

@@ -3,8 +3,15 @@
 #import "TSInstallationController.h"
 #import "TSHahaSticker.h"
 #import <TSPresentationDelegate.h>
+#import <TSUtil.h>
 
 static NSString* const kTSPrivateAppsAPIURLString = @"https://apps.cheatiosvip.net/api/private-apps";
+// Per bundle id, the downloadURL that was actually installed last time — lets us tell
+// "server entry changed since I installed it" apart from "nothing changed" without
+// relying on the admin remembering to bump a version field.
+static NSString* const kTSPrivateAppInstalledSourcesDefaultsKey = @"PrivateAppInstalledSourceURLs";
+
+extern NSUserDefaults* trollStoreUserDefaults(void);
 
 // Same visual language as TSAppTableViewController's card cell, duplicated under a
 // distinct class name since Objective-C classes are linked globally even when the
@@ -96,6 +103,40 @@ static NSString* const kTSPrivateAppsAPIURLString = @"https://apps.cheatiosvip.n
 	{
 		[self fetchApps];
 	}
+	else
+	{
+		// Cheap local re-check (installed/update state can change while this tab wasn't visible).
+		[self.tableView reloadData];
+	}
+}
+
+// Returns the CFBundleVersion of the installed app with this bundle id, or nil if not installed.
+- (NSString*)installedVersionForBundleId:(NSString*)bundleId
+{
+	if(bundleId.length == 0) return nil;
+
+	LSApplicationProxy* proxy = [LSApplicationProxy applicationProxyForIdentifier:bundleId];
+	if(!proxy || !proxy.installed || !proxy.bundleURL) return nil;
+
+	NSBundle* bundle = [NSBundle bundleWithURL:proxy.bundleURL];
+	return [bundle objectForInfoDictionaryKey:@"CFBundleVersion"];
+}
+
+- (NSString*)recordedDownloadURLForBundleId:(NSString*)bundleId
+{
+	if(bundleId.length == 0) return nil;
+	NSDictionary* sources = [trollStoreUserDefaults() objectForKey:kTSPrivateAppInstalledSourcesDefaultsKey];
+	return [sources isKindOfClass:NSDictionary.class] ? sources[bundleId] : nil;
+}
+
+- (void)recordInstalledDownloadURL:(NSString*)downloadURLString forBundleId:(NSString*)bundleId
+{
+	if(bundleId.length == 0 || downloadURLString.length == 0) return;
+
+	NSUserDefaults* defaults = trollStoreUserDefaults();
+	NSMutableDictionary* sources = [([defaults objectForKey:kTSPrivateAppInstalledSourcesDefaultsKey] ?: @{}) mutableCopy];
+	sources[bundleId] = downloadURLString;
+	[defaults setObject:sources forKey:kTSPrivateAppInstalledSourcesDefaultsKey];
 }
 
 - (void)refreshPulled
@@ -201,16 +242,16 @@ static NSString* const kTSPrivateAppsAPIURLString = @"https://apps.cheatiosvip.n
 	[self loadIconForApp:app tableView:tableView];
 	cell.imageView.image = (app.iconURLString.length && _cachedIcons[app.iconURLString]) ? _cachedIcons[app.iconURLString] : _placeholderIcon;
 
-	UIButton* installButton = [UIButton buttonWithType:UIButtonTypeSystem];
-	[installButton setTitle:@"Cài đặt" forState:UIControlStateNormal];
-	installButton.titleLabel.font = [UIFont boldSystemFontOfSize:15];
-	[installButton sizeToFit];
-	CGRect buttonFrame = installButton.frame;
+	UIButton* actionButton = [UIButton buttonWithType:UIButtonTypeSystem];
+	[actionButton setTitle:[self actionTitleForApp:app] forState:UIControlStateNormal];
+	actionButton.titleLabel.font = [UIFont boldSystemFontOfSize:15];
+	[actionButton sizeToFit];
+	CGRect buttonFrame = actionButton.frame;
 	buttonFrame.size.width += 16;
-	installButton.frame = buttonFrame;
-	installButton.tag = indexPath.section;
-	[installButton addTarget:self action:@selector(installButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
-	cell.accessoryView = installButton;
+	actionButton.frame = buttonFrame;
+	actionButton.tag = indexPath.section;
+	[actionButton addTarget:self action:@selector(actionButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
+	cell.accessoryView = actionButton;
 
 	return cell;
 }
@@ -250,21 +291,51 @@ static NSString* const kTSPrivateAppsAPIURLString = @"https://apps.cheatiosvip.n
 	[task resume];
 }
 
-- (void)installButtonTapped:(UIButton*)sender
+// Not installed -> "Cài đặt". Installed and the recorded install source still matches
+// the server entry (or we have no record of it, e.g. installed before this tracking
+// existed) -> "Mở". Installed but the server's file/link changed since -> "Cập nhật".
+- (BOOL)appHasUpdate:(TSRemoteAppInfo*)app
 {
-	[self installAppAtIndex:sender.tag];
+	NSString* recordedURL = [self recordedDownloadURLForBundleId:app.bundleId];
+	if(recordedURL.length == 0) return NO;
+	return ![recordedURL isEqualToString:app.downloadURLString];
+}
+
+- (NSString*)actionTitleForApp:(TSRemoteAppInfo*)app
+{
+	NSString* installedVersion = [self installedVersionForBundleId:app.bundleId];
+	if(!installedVersion) return @"Cài đặt";
+	if([self appHasUpdate:app]) return @"Cập nhật";
+	return @"Mở";
+}
+
+- (void)actionButtonTapped:(UIButton*)sender
+{
+	[self performActionForAppAtIndex:sender.tag];
 }
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath
 {
 	[tableView deselectRowAtIndexPath:indexPath animated:YES];
-	[self installAppAtIndex:indexPath.section];
+	[self performActionForAppAtIndex:indexPath.section];
 }
 
-- (void)installAppAtIndex:(NSInteger)index
+- (void)performActionForAppAtIndex:(NSInteger)index
 {
 	if(index < 0 || index >= (NSInteger)_apps.count) return;
 	TSRemoteAppInfo* app = _apps[index];
+
+	NSString* installedVersion = [self installedVersionForBundleId:app.bundleId];
+	if(installedVersion && ![self appHasUpdate:app])
+	{
+		if(app.bundleId.length)
+		{
+			[[LSApplicationWorkspace defaultWorkspace] openApplicationWithBundleID:app.bundleId];
+		}
+		return;
+	}
+
+	BOOL isUpdate = installedVersion != nil;
 
 	NSURL* downloadURL = [NSURL URLWithString:app.downloadURLString];
 	if(!downloadURL)
@@ -275,10 +346,20 @@ static NSString* const kTSPrivateAppsAPIURLString = @"https://apps.cheatiosvip.n
 		return;
 	}
 
-	UIAlertController* confirmAlert = [UIAlertController alertControllerWithTitle:app.name message:@"Tải và cài đặt app này?" preferredStyle:UIAlertControllerStyleAlert];
+	NSString* message = isUpdate ? @"Tải và cập nhật app này lên bản mới?" : @"Tải và cài đặt app này?";
+	UIAlertController* confirmAlert = [UIAlertController alertControllerWithTitle:app.name message:message preferredStyle:UIAlertControllerStyleAlert];
 	[confirmAlert addAction:[UIAlertAction actionWithTitle:@"Huỷ" style:UIAlertActionStyleCancel handler:nil]];
-	[confirmAlert addAction:[UIAlertAction actionWithTitle:@"Cài đặt" style:UIAlertActionStyleDefault handler:^(UIAlertAction* action) {
-		[TSInstallationController handleAppInstallFromRemoteURL:downloadURL completion:nil];
+	[confirmAlert addAction:[UIAlertAction actionWithTitle:(isUpdate ? @"Cập nhật" : @"Cài đặt") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action) {
+		__weak typeof(self) weakSelf = self;
+		[TSInstallationController handleAppInstallFromRemoteURL:downloadURL completion:^(BOOL success, NSError* error) {
+			if(success)
+			{
+				[weakSelf recordInstalledDownloadURL:app.downloadURLString forBundleId:app.bundleId];
+				dispatch_async(dispatch_get_main_queue(), ^{
+					[weakSelf.tableView reloadData];
+				});
+			}
+		}];
 	}]];
 	[TSPresentationDelegate presentViewController:confirmAlert animated:YES completion:nil];
 }

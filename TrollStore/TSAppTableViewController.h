@@ -9,6 +9,7 @@
     NSMutableDictionary* _cachedIcons;
     UISearchController* _searchController;
 	NSString* _searchKey;
+	NSTimer* _installedAgoTimer;
 }
 
 @end

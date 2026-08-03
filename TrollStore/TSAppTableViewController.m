@@ -39,14 +39,36 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 + (UIImage *)_applicationIconImageForBundleIdentifier:(NSString *)id format:(NSInteger)format scale:(double)scale;
 @end
 
+// Formats how long ago `installDate` was as a running clock, e.g. "🕐 Đã cài 3 ngày 02:15:47"
+// (or just "🕐 Đã cài 02:15:47" under a day) — reads as a stopwatch that keeps counting up.
+NSString* installedAgoStringForDate(NSDate* installDate)
+{
+	if(!installDate) return nil;
+
+	NSInteger totalSeconds = (NSInteger)MAX(0, -[installDate timeIntervalSinceNow]);
+	NSInteger days = totalSeconds / 86400;
+	NSInteger hours = (totalSeconds % 86400) / 3600;
+	NSInteger minutes = (totalSeconds % 3600) / 60;
+	NSInteger seconds = totalSeconds % 60;
+
+	if(days > 0)
+	{
+		return [NSString stringWithFormat:@"🕐 Đã cài %ld ngày %02ld:%02ld:%02ld", (long)days, (long)hours, (long)minutes, (long)seconds];
+	}
+	return [NSString stringWithFormat:@"🕐 Đã cài %02ld:%02ld:%02ld", (long)hours, (long)minutes, (long)seconds];
+}
+
 // Draws a dashed outline around each row so every installed app reads as its
 // own bordered card instead of just being separated by background/gap.
 @interface TSDashedCardCell : UITableViewCell
+@property (nonatomic, strong) NSDate* installDate;
+- (void)refreshInstalledAgoText;
 @end
 
 @implementation TSDashedCardCell
 {
 	CAShapeLayer* _dashedBorderLayer;
+	UILabel* _installedAgoLabel;
 }
 
 - (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString*)reuseIdentifier
@@ -70,6 +92,11 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 		_dashedBorderLayer.lineWidth = 1.5;
 		_dashedBorderLayer.lineDashPattern = @[@5, @4];
 		[self.layer addSublayer:_dashedBorderLayer];
+
+		_installedAgoLabel = [[UILabel alloc] init];
+		_installedAgoLabel.font = [UIFont systemFontOfSize:12];
+		_installedAgoLabel.textColor = [UIColor.secondaryLabelColor colorWithAlphaComponent:0.85];
+		[self.contentView addSubview:_installedAgoLabel];
 	}
 	return self;
 }
@@ -79,6 +106,29 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 	[super layoutSubviews];
 	_dashedBorderLayer.frame = self.bounds;
 	_dashedBorderLayer.path = [UIBezierPath bezierPathWithRoundedRect:self.bounds cornerRadius:10].CGPath;
+
+	CGRect detailFrame = self.detailTextLabel.frame;
+	CGFloat labelX = self.textLabel.frame.origin.x;
+	CGFloat maxWidth = self.contentView.bounds.size.width - labelX - 12;
+	_installedAgoLabel.frame = CGRectMake(labelX, CGRectGetMaxY(detailFrame) + 2, MAX(maxWidth, 0), 15);
+}
+
+- (void)setInstallDate:(NSDate*)installDate
+{
+	_installDate = installDate;
+	[self refreshInstalledAgoText];
+}
+
+- (void)refreshInstalledAgoText
+{
+	_installedAgoLabel.hidden = (_installDate == nil);
+	_installedAgoLabel.text = installedAgoStringForDate(_installDate);
+}
+
+- (void)prepareForReuse
+{
+	[super prepareForReuse];
+	self.installDate = nil;
 }
 
 @end
@@ -134,6 +184,7 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 - (void)dealloc
 {
 	[[LSApplicationWorkspace defaultWorkspace] removeObserver:self];
+	[_installedAgoTimer invalidate];
 }
 
 - (void)reloadTable
@@ -160,6 +211,33 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 
 	[self _setUpNavigationBar];
 	[self _setUpSearchBar];
+}
+
+- (void)viewWillAppear:(BOOL)animated
+{
+	[super viewWillAppear:animated];
+
+	[_installedAgoTimer invalidate];
+	_installedAgoTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(tickInstalledAgoLabels) userInfo:nil repeats:YES];
+}
+
+- (void)viewWillDisappear:(BOOL)animated
+{
+	[super viewWillDisappear:animated];
+
+	[_installedAgoTimer invalidate];
+	_installedAgoTimer = nil;
+}
+
+- (void)tickInstalledAgoLabels
+{
+	for(UITableViewCell* cell in self.tableView.visibleCells)
+	{
+		if([cell isKindOfClass:TSDashedCardCell.class])
+		{
+			[(TSDashedCardCell*)cell refreshInstalledAgoText];
+		}
+	}
 }
 
 - (void)_setUpNavigationBar
@@ -420,6 +498,10 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 	// Configure the cell...
 	cell.textLabel.text = [appInfo displayName];
 	cell.detailTextLabel.text = [NSString stringWithFormat:@"%@ • %@", appVersion, appId];
+
+	NSString* bundlePath = [appInfo bundlePath];
+	NSDictionary* fsAttributes = bundlePath ? [[NSFileManager defaultManager] attributesOfItemAtPath:bundlePath error:nil] : nil;
+	cell.installDate = fsAttributes[NSFileCreationDate] ?: fsAttributes[NSFileModificationDate];
 	cell.imageView.layer.borderWidth = 1;
 	cell.imageView.layer.borderColor = [UIColor.labelColor colorWithAlphaComponent:0.1].CGColor;
 	cell.imageView.layer.cornerRadius = 13.5;
@@ -488,7 +570,19 @@ UIImage* imageWithSize(UIImage* image, CGSize size)
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-	return 80.0f;
+	return 94.0f;
+}
+
+// Each installed app is its own section (so the dashed card gets a gap around it); the
+// default inset-grouped header/footer height leaves a much wider gap than that needs.
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
+{
+	return section == 0 ? 0.01f : 10.0f;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section
+{
+	return 0.01f;
 }
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath

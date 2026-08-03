@@ -219,6 +219,18 @@ extern NSUserDefaults* trollStoreUserDefaults(void);
 	return 80.0f;
 }
 
+// Each app is its own section (so the dashed card gets a gap around it); the default
+// inset-grouped header/footer height leaves a much wider gap than that needs.
+- (CGFloat)tableView:(UITableView*)tableView heightForHeaderInSection:(NSInteger)section
+{
+	return section == 0 ? 0.01f : 10.0f;
+}
+
+- (CGFloat)tableView:(UITableView*)tableView heightForFooterInSection:(NSInteger)section
+{
+	return 0.01f;
+}
+
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath
 {
 	TSPrivateAppCardCell* cell = (TSPrivateAppCardCell*)[tableView dequeueReusableCellWithIdentifier:@"PrivateAppCell"];

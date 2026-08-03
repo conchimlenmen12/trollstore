@@ -47,7 +47,7 @@
 		infoGroupSpecifier.name = @"Info";
 		[_specifiers addObject:infoGroupSpecifier];
 
-		PSSpecifier* infoSpecifier = [PSSpecifier preferenceSpecifierNamed:@"TrollStore"
+		PSSpecifier* infoSpecifier = [PSSpecifier preferenceSpecifierNamed:@"CheatTrollStore"
 											target:self
 											set:nil
 											get:@selector(getTrollStoreInfoString)
@@ -64,7 +64,7 @@
 		if(_newerVersion && isInstalled)
 		{
 			// Update TrollStore
-			PSSpecifier* updateTrollStoreSpecifier = [PSSpecifier preferenceSpecifierNamed:[NSString stringWithFormat:@"Update TrollStore to %@", _newerVersion]
+			PSSpecifier* updateTrollStoreSpecifier = [PSSpecifier preferenceSpecifierNamed:[NSString stringWithFormat:@"Update CheatTrollStore to %@", _newerVersion]
 										target:self
 										set:nil
 										get:nil
@@ -100,7 +100,7 @@
 		}
 		if(isInstalled)
 		{
-			PSSpecifier* uninstallTrollStoreSpecifier = [PSSpecifier preferenceSpecifierNamed:@"Uninstall TrollStore"
+			PSSpecifier* uninstallTrollStoreSpecifier = [PSSpecifier preferenceSpecifierNamed:@"Uninstall CheatTrollStore"
 										target:self
 										set:nil
 										get:nil
@@ -115,7 +115,7 @@
 		}
 		else
 		{
-			PSSpecifier* installTrollStoreSpecifier = [PSSpecifier preferenceSpecifierNamed:@"Install TrollStore"
+			PSSpecifier* installTrollStoreSpecifier = [PSSpecifier preferenceSpecifierNamed:@"Install CheatTrollStore"
 												target:self
 												set:nil
 												get:nil
@@ -163,7 +163,7 @@
 
 			if(isRegistered)
 			{
-				bottomText = @"This app is registered as the TrollStore persistence helper and can be used to fix TrollStore app registrations in case they revert back to \"User\" state and the apps say they're unavailable.";
+				bottomText = @"This app is registered as the CheatTrollStore persistence helper and can be used to fix CheatTrollStore app registrations in case they revert back to \"User\" state and the apps say they're unavailable.";
 				registerUnregisterSpecifier = [PSSpecifier preferenceSpecifierNamed:@"Unregister Persistence Helper"
 												target:self
 												set:nil
@@ -178,7 +178,7 @@
 			}
 			else if(!persistenceHelperProxy)
 			{
-				bottomText = @"If you want to use this app as the TrollStore persistence helper, you can register it here.";
+				bottomText = @"If you want to use this app as the CheatTrollStore persistence helper, you can register it here.";
 				registerUnregisterSpecifier = [PSSpecifier preferenceSpecifierNamed:@"Register Persistence Helper"
 												target:self
 												set:nil
@@ -205,7 +205,7 @@
 		}
 	}
 	
-	[(UINavigationItem *)self.navigationItem setTitle:@"TrollStore Helper"];
+	[(UINavigationItem *)self.navigationItem setTitle:@"CheatiOSVip Helper"];
 	return _specifiers;
 }
 

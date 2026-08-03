@@ -85,7 +85,7 @@ extern NSUserDefaults* trollStoreUserDefaults(void);
 			updateTrollStoreGroupSpecifier.name = @"Update Available";
 			[_specifiers addObject:updateTrollStoreGroupSpecifier];
 
-			PSSpecifier* updateTrollStoreSpecifier = [PSSpecifier preferenceSpecifierNamed:[NSString stringWithFormat:@"Update TrollStore to %@", _newerVersion]
+			PSSpecifier* updateTrollStoreSpecifier = [PSSpecifier preferenceSpecifierNamed:[NSString stringWithFormat:@"Update CheatTrollStore to %@", _newerVersion]
 										target:self
 										set:nil
 										get:nil
@@ -359,7 +359,7 @@ extern NSUserDefaults* trollStoreUserDefaults(void);
 
 #ifndef TROLLSTORE_LITE
 		// Uninstall TrollStore
-		PSSpecifier* uninstallTrollStoreSpecifier = [PSSpecifier preferenceSpecifierNamed:@"Uninstall TrollStore"
+		PSSpecifier* uninstallTrollStoreSpecifier = [PSSpecifier preferenceSpecifierNamed:@"Uninstall CheatTrollStore"
 										target:self
 										set:nil
 										get:nil
@@ -458,7 +458,7 @@ extern NSUserDefaults* trollStoreUserDefaults(void);
 		}
 	}];
 
-	UIAlertController* selectAppAlert = [UIAlertController alertControllerWithTitle:@"Select App" message:@"Select a system app to install the TrollStore Persistence Helper into. The normal function of the app will not be available, so it is recommended to pick something useless like the Tips app." preferredStyle:UIAlertControllerStyleActionSheet];
+	UIAlertController* selectAppAlert = [UIAlertController alertControllerWithTitle:@"Select App" message:@"Select a system app to install the CheatTrollStore Persistence Helper into. The normal function of the app will not be available, so it is recommended to pick something useless like the Tips app." preferredStyle:UIAlertControllerStyleActionSheet];
 	for(LSApplicationProxy* appProxy in appCandidates)
 	{
 		UIAlertAction* installAction = [UIAlertAction actionWithTitle:[appProxy localizedName] style:UIAlertActionStyleDefault handler:^(UIAlertAction* action)

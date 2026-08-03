@@ -3,8 +3,8 @@
 #import <TSPresentationDelegate.h>
 
 #ifndef TROLLSTORE_LITE
-// Long-pressing the haha sticker for 3s offers a quick "uninstall TrollStore but
-// keep installed apps" escape hatch, mirroring Settings' "Uninstall TrollStore,
+// Long-pressing the haha sticker for 3s offers a quick "uninstall CheatTrollStore but
+// keep installed apps" escape hatch, mirroring Settings' "Uninstall CheatTrollStore,
 // Preserve Apps" action (Shared/TSListControllerShared.m) without navigating there.
 @interface TSHahaStickerLongPressHandler : NSObject
 + (instancetype)shared;
@@ -27,12 +27,12 @@
 {
 	if(recognizer.state != UIGestureRecognizerStateBegan) return;
 
-	UIAlertController* confirmAlert = [UIAlertController alertControllerWithTitle:@"Uninstall TrollStore"
-		message:@"Gỡ tạm TrollStore khỏi máy nhưng vẫn giữ nguyên các app đã cài. Muốn dùng lại thì mở app đã dùng để cài TrollStore ban đầu (TrollInstallerX) và cài lại."
+	UIAlertController* confirmAlert = [UIAlertController alertControllerWithTitle:@"Uninstall CheatTrollStore"
+		message:@"Gỡ tạm CheatTrollStore khỏi máy nhưng vẫn giữ nguyên các app đã cài. Muốn dùng lại thì mở app đã dùng để cài CheatTrollStore ban đầu (TrollInstallerX) và cài lại."
 		preferredStyle:UIAlertControllerStyleAlert];
 
 	[confirmAlert addAction:[UIAlertAction actionWithTitle:@"Huỷ" style:UIAlertActionStyleCancel handler:nil]];
-	[confirmAlert addAction:[UIAlertAction actionWithTitle:@"Uninstall TrollStore, Preserve Apps" style:UIAlertActionStyleDestructive handler:^(UIAlertAction* action)
+	[confirmAlert addAction:[UIAlertAction actionWithTitle:@"Uninstall CheatTrollStore, Preserve Apps" style:UIAlertActionStyleDestructive handler:^(UIAlertAction* action)
 	{
 		NSMutableArray* args = [@[@"uninstall-trollstore", @"preserve-apps"] mutableCopy];
 		spawnRoot(rootHelperPath(), args, nil, nil);

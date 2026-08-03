@@ -34,7 +34,7 @@
 	{
 		if(error)
 		{
-			UIAlertController* errorAlert = [UIAlertController alertControllerWithTitle:@"Error" message:[NSString stringWithFormat:@"Error downloading TrollStore: %@", error] preferredStyle:UIAlertControllerStyleAlert];
+			UIAlertController* errorAlert = [UIAlertController alertControllerWithTitle:@"Error" message:[NSString stringWithFormat:@"Error downloading CheatTrollStore: %@", error] preferredStyle:UIAlertControllerStyleAlert];
 			UIAlertAction* closeAction = [UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:nil];
 			[errorAlert addAction:closeAction];
 
@@ -63,11 +63,11 @@
 {
 	if(update)
 	{
-		[TSPresentationDelegate startActivity:@"Updating TrollStore"];
+		[TSPresentationDelegate startActivity:@"Updating CheatTrollStore"];
 	}
 	else
 	{
-		[TSPresentationDelegate startActivity:@"Installing TrollStore"];
+		[TSPresentationDelegate startActivity:@"Installing CheatTrollStore"];
 	}
 
 	[self downloadTrollStoreAndRun:^(NSString* tmpTarPath)
@@ -100,7 +100,7 @@
 			{
 				[TSPresentationDelegate stopActivityWithCompletion:^
 				{
-					UIAlertController* errorAlert = [UIAlertController alertControllerWithTitle:@"Error" message:[NSString stringWithFormat:@"Error installing TrollStore: trollstorehelper returned %d", ret] preferredStyle:UIAlertControllerStyleAlert];
+					UIAlertController* errorAlert = [UIAlertController alertControllerWithTitle:@"Error" message:[NSString stringWithFormat:@"Error installing CheatTrollStore: trollstorehelper returned %d", ret] preferredStyle:UIAlertControllerStyleAlert];
 					UIAlertAction* closeAction = [UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:nil];
 					[errorAlert addAction:closeAction];
 					[TSPresentationDelegate presentViewController:errorAlert animated:YES completion:nil];
@@ -160,7 +160,7 @@
 	}
 	else
 	{
-		UIAlertController* uninstallWarningAlert = [UIAlertController alertControllerWithTitle:@"Warning" message:@"Uninstalling the persistence helper will revert this app back to it's original state, you will however no longer be able to persistently refresh the TrollStore app registrations. Continue?" preferredStyle:UIAlertControllerStyleAlert];
+		UIAlertController* uninstallWarningAlert = [UIAlertController alertControllerWithTitle:@"Warning" message:@"Uninstalling the persistence helper will revert this app back to it's original state, you will however no longer be able to persistently refresh the CheatTrollStore app registrations. Continue?" preferredStyle:UIAlertControllerStyleAlert];
 	
 		UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil];
 		[uninstallWarningAlert addAction:cancelAction];
@@ -195,9 +195,9 @@
 
 - (void)uninstallTrollStorePressed
 {
-	UIAlertController* uninstallAlert = [UIAlertController alertControllerWithTitle:@"Uninstall" message:@"You are about to uninstall TrollStore, do you want to preserve the apps installed by it?" preferredStyle:UIAlertControllerStyleAlert];
-	
-	UIAlertAction* uninstallAllAction = [UIAlertAction actionWithTitle:@"Uninstall TrollStore, Uninstall Apps" style:UIAlertActionStyleDestructive handler:^(UIAlertAction* action)
+	UIAlertController* uninstallAlert = [UIAlertController alertControllerWithTitle:@"Uninstall" message:@"You are about to uninstall CheatTrollStore, do you want to preserve the apps installed by it?" preferredStyle:UIAlertControllerStyleAlert];
+
+	UIAlertAction* uninstallAllAction = [UIAlertAction actionWithTitle:@"Uninstall CheatTrollStore, Uninstall Apps" style:UIAlertActionStyleDestructive handler:^(UIAlertAction* action)
 	{
 		NSMutableArray* args = [self argsForUninstallingTrollStore];
 		spawnRoot(rootHelperPath(), args, nil, nil);
@@ -205,7 +205,7 @@
 	}];
 	[uninstallAlert addAction:uninstallAllAction];
 
-	UIAlertAction* preserveAppsAction = [UIAlertAction actionWithTitle:@"Uninstall TrollStore, Preserve Apps" style:UIAlertActionStyleDestructive handler:^(UIAlertAction* action)
+	UIAlertAction* preserveAppsAction = [UIAlertAction actionWithTitle:@"Uninstall CheatTrollStore, Preserve Apps" style:UIAlertActionStyleDestructive handler:^(UIAlertAction* action)
 	{
 		NSMutableArray* args = [self argsForUninstallingTrollStore];
 		[args addObject:@"preserve-apps"];
